@@ -1,0 +1,54 @@
+[
+  {
+    "name": "downloads and writes the file",
+    "path": "a/b.txt",
+    "http": { "status": 200, "body": "hi" },
+    "expect": { "ok": { "path": "a/b.txt", "bytes": 2 } }
+  },
+  {
+    "name": "counts bytes, not characters",
+    "path": "greeting.txt",
+    "http": { "status": 200, "body": "привет" },
+    "expect": { "ok": { "path": "greeting.txt", "bytes": 12 } }
+  },
+  {
+    "name": "rejects an error status and writes nothing",
+    "path": "a.txt",
+    "http": { "status": 404, "body": "nope" },
+    "expect": { "error": { "kind": "status", "code": 404 }, "written": false }
+  },
+  {
+    "name": "rejects a path with a parent segment before any request",
+    "path": "../escape.txt",
+    "http": { "status": 200, "body": "x" },
+    "expect": {
+      "error": { "kind": "invalidPath", "path": "../escape.txt" },
+      "httpContacted": false
+    }
+  },
+  {
+    "name": "rejects an absolute path before any request",
+    "path": "/etc/passwd",
+    "http": { "status": 200, "body": "x" },
+    "expect": { "error": { "kind": "invalidPath", "path": "/etc/passwd" }, "httpContacted": false }
+  },
+  {
+    "name": "rejects an empty path before any request",
+    "path": "",
+    "http": { "status": 200, "body": "x" },
+    "expect": { "error": { "kind": "invalidPath", "path": "" }, "httpContacted": false }
+  },
+  {
+    "name": "reports a failed request as a network error",
+    "path": "a.txt",
+    "http": { "fail": true },
+    "expect": { "error": { "kind": "network" }, "written": false }
+  },
+  {
+    "name": "reports a failed write as an io error",
+    "path": "blocked",
+    "http": { "status": 200, "body": "x" },
+    "fs": { "writeFails": true },
+    "expect": { "error": { "kind": "io" } }
+  }
+]
