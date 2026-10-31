@@ -89,6 +89,11 @@ cargo run -p app-cli -- fetch <url> <path>
 и `bun run test:wasm`; если менялись `src-tauri` или команды — ещё `bun run test:native`.
 Если что-то не удалось проверить (например, нет wasm-таргета), прямо скажите об этом.
 
+**Окружение (ADR-0012).** `bun run doctor` показывает, чего не хватает; он только читает и ничего не ставит. Версии живут в
+одном месте: Rust — `rust-toolchain.toml`, bun — `package.json` (`packageManager`), `wasm-bindgen-cli` — `Cargo.lock`, системные
+пакеты Debian — `tools/system-deps/debian.txt`. Не прописывайте версии в `ci.yml` и скриптах, читайте из этих файлов (это проверяет
+`tools/doctor/src/consistency.test.ts`). Node.js нужен только для `bun run test:wasm`; для остального bun. Образ — `.devcontainer/`.
+
 ## Стек и версии
 
 - bun workspaces; версии зависимостей закреплены в `catalog` корневого `package.json`.
