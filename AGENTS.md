@@ -25,11 +25,15 @@
 - `crates/core` — домен, use-cases, порты (`Fs`, `Http`). Платформо-независимый.
 - `crates/platform-native` — нативные адаптеры портов (tokio, reqwest).
 - `crates/cli` — консольное приложение (бинарник `app`).
-- `packages/platform` — TS-порты для web-стороны.
+- `crates/core-wasm` — тонкая `wasm-bindgen`-привязка ядра для браузера (логики нет).
+- `packages/platform` — TS-порты (`Fs`, `Http`, `Platform`).
+- `packages/platform-web` — адаптеры портов для браузера (OPFS, `fetch`).
+- `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
-- `apps/web` — Vite + Solid 2 + Tailwind. Пока работает с заглушкой сервиса (`src/service.ts`).
+- `apps/web` — Vite + Solid 2 + Tailwind. Пока работает с заглушкой сервиса (`src/service.ts`);
+  настоящее ядро подключим в #5.
 - Планируются: `apps/native` (Tauri 2, `src-tauri` добавить в `members` корневого `Cargo.toml`),
-  `crates/core-wasm`, `packages/ui`, `packages/app`, `packages/features/*`.
+  `packages/ui`, `packages/app`, `packages/features/*`.
 
 ## Жёсткие правила архитектуры
 
@@ -41,22 +45,34 @@
 4. Адаптеры подключает только точка входа приложения (`cli`, `src-tauri`, `apps/web`).
 5. Нет проверок вида `if (isTauri)` в прикладном коде: отличия выражаются через наличие порта
    (`hasCapability` / `requirePort`).
-6. Сборки независимы: CLI не должен требовать Node/Vite, web — Rust-приложений Tauri.
+6. Сборки независимы: CLI не должен требовать Node/Vite, web — Tauri. (Web требует Rust, таргет wasm32
+   и `wasm-bindgen-cli`: ADR-0008.)
 7. Новую логику покрывайте тестами на фейках портов (см. `crates/core/src/fetcher.rs`).
+8. Граница WASM: `packages/core-wasm/pkg` генерируется и не коммитится. Версия `wasm-bindgen-cli`
+   равна версии крейта `wasm-bindgen` (закреплён как `=x.y.z`). Форма JS-портов описана в Rust
+   (`typescript_custom_section`), TS-типы берутся оттуда, а не пишутся вручную.
+9. Один порт не значит одинаковое поведение: в вебе `Http` подчиняется CORS, а OPFS не является
+   файловой системой пользователя. Не обещайте в UI и текстах нативной семантики для web.
 
 ## Команды
 
 ```sh
 bun install
 cargo test --workspace            # Rust-тесты
-bun run typecheck                 # TS typecheck (tsc из TypeScript 7)
+cargo fmt --all --check           # форматирование (CI это проверяет)
+bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
+bun run test                      # TS-тесты (vitest)
+bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg
+bun run test:wasm                 # тесты Rust↔JS моста под Node (нужен wasm-bindgen-cli)
 bun run dev:web                   # dev-сервер web (Vite)
 bun run build:web                 # продакшен-сборка web в apps/web/dist
 cargo run -p app-cli -- fetch <url> <path>
 ```
 
-Перед завершением задачи прогоните `cargo test --workspace` и `bun run typecheck`;
-если менялся web — ещё и `bun run build:web` (typecheck не ловит ошибки плагинов и Tailwind).
+Перед завершением задачи прогоните `cargo fmt --all --check`, `cargo test --workspace`,
+`bun run typecheck` и `bun run test`; если менялся web — ещё `bun run build:web` (typecheck не ловит
+ошибки плагинов и Tailwind), если менялись `core`, `core-wasm` или `platform-web` — ещё `bun run check:wasm`
+и `bun run test:wasm`.
 Если что-то не удалось проверить (например, нет wasm-таргета), прямо скажите об этом.
 
 ## Стек и версии

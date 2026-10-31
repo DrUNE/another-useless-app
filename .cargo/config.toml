@@ -1,0 +1,4 @@
+# Тесты под wasm32 запускаются через Node: `cargo test -p app-core-wasm --target wasm32-unknown-unknown`.
+# Раннер входит в wasm-bindgen-cli (версия должна совпадать с крейтом wasm-bindgen).
+[target.wasm32-unknown-unknown]
+runner = "wasm-bindgen-test-runner"

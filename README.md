@@ -16,7 +16,7 @@
 | Цель | Стек | Статус |
 |---|---|---|
 | CLI | Rust (`crates/cli`) | готово |
-| Web | Solid 2 + Tailwind + ядро в WASM | каркас готов, сервис пока заглушка |
+| Web | Solid 2 + Tailwind + ядро в WASM | UI с заглушкой; ядро в WASM собирается и проверено в браузере, к UI не подключено |
 | Desktop | Tauri 2 | запланировано |
 | Mobile | Tauri 2 (Android, iOS) | запланировано |
 
@@ -38,10 +38,13 @@ apps/
 crates/
   core/             # домен, use-cases, порты Fs/Http. Без tokio/reqwest/std::fs
   platform-native/  # адаптеры портов: tokio::fs, reqwest (для CLI и Tauri)
+  core-wasm/        # тонкая wasm-bindgen-привязка ядра для браузера
   cli/              # бинарник `app`
 packages/
   config/           # общие tsconfig и Tailwind-тема (theme.css)
-  platform/         # TS-порты Fs/Http/Platform (для web-стороны)
+  platform/         # TS-порты Fs/Http/Platform
+  platform-web/     # адаптеры портов для браузера: OPFS, fetch
+  core-wasm/        # сборка WASM, TS-мост портов, createCore(platform)
 ```
 
 Правила зависимостей:
@@ -61,7 +64,9 @@ web         →  core-wasm (+ TS-адаптеры OPFS/fetch)  →  core
 
 - [Rust](https://rustup.rs) (stable, проверено на 1.99)
 - [bun](https://bun.sh) 1.4+
-- для web (позже): таргет `wasm32-unknown-unknown`
+- для WASM-сборки ядра: таргет `wasm32-unknown-unknown` (`rustup target add wasm32-unknown-unknown`)
+  и `wasm-bindgen-cli` **той же версии, что крейт `wasm-bindgen` в `Cargo.lock`**
+  (`cargo install wasm-bindgen-cli --version <версия> --locked`; версию покажет `cargo pkgid wasm-bindgen`)
 - для mobile (позже): Android SDK/NDK; для iOS нужен macOS
 
 ## Команды
@@ -70,7 +75,12 @@ web         →  core-wasm (+ TS-адаптеры OPFS/fetch)  →  core
 bun install                  # установить JS-зависимости
 
 cargo test --workspace       # тесты Rust (ядро проверяется на фейках)
-bun run typecheck            # typecheck TS-пакетов
+bun run typecheck            # typecheck TS-пакетов (Rust не нужен)
+bun run test                 # TS-тесты (vitest)
+
+bun run build:wasm           # собрать ядро в WASM: packages/core-wasm/pkg
+bun run check:wasm           # сборка WASM + typecheck кода, который его импортирует
+bun run test:wasm            # тесты моста Rust ↔ JS под Node
 
 bun run dev:web              # web: dev-сервер Vite
 bun run build:web            # web: продакшен-сборка в apps/web/dist
@@ -82,7 +92,9 @@ cargo build -p app-cli --release   # бинарник: target/release/app
 
 Скрипты `dev:native` и `build:native` уже заведены, но `apps/native` ещё не создан.
 
-Для изучения: [Solid 2 и Tailwind 4 для разработчика на React](docs/learning/solid-and-tailwind-for-react-developers.md).
+Для изучения:
+[Solid 2 и Tailwind 4 для разработчика на React](docs/learning/solid-and-tailwind-for-react-developers.md),
+[Rust для разработчика на TypeScript](docs/learning/rust-for-typescript-developers.md).
 
 ## Дорожная карта и процесс
 
