@@ -126,6 +126,15 @@
         "vitest": "catalog:",
       },
     },
+    "tools/ci": {
+      "name": "@app/ci",
+      "devDependencies": {
+        "@app/config": "workspace:*",
+        "@types/node": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
     "tools/doctor": {
       "name": "@app/doctor",
       "devDependencies": {
@@ -160,6 +169,8 @@
     "@app/app": ["@app/app@workspace:packages/app"],
 
     "@app/boundaries": ["@app/boundaries@workspace:tools/boundaries"],
+
+    "@app/ci": ["@app/ci@workspace:tools/ci"],
 
     "@app/config": ["@app/config@workspace:packages/config"],
 

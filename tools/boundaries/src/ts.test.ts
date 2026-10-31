@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import rules from "../rules.json" with { type: "json" };
@@ -61,7 +63,8 @@ describe("checkTs", () => {
 });
 
 describe("rules against this repository", () => {
-  const root = new URL("../../..", import.meta.url).pathname;
+  // fileURLToPath, а не .pathname: на Windows pathname даёт "/D:/…", и такой путь не открывается.
+  const root = fileURLToPath(new URL("../../..", import.meta.url));
   const packages = readWorkspace(root);
 
   it("every TS rule refers to an existing workspace package", () => {
