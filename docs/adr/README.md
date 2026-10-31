@@ -15,3 +15,4 @@
 | [0008](0008-wasm-boundary.md) | Граница WASM: порты реализуются в JS, артефакты не коммитятся | принято |
 | [0009](0009-typed-ipc-tauri-specta.md) | Типизированный IPC через tauri-specta | принято |
 | [0010](0010-native-app-isolation-and-trust.md) | Нативное приложение: изоляция сборки и модель доверия | принято |
+| [0011](0011-oxc-lint-and-format.md) | Линтер и форматтер: oxlint и oxfmt | принято |

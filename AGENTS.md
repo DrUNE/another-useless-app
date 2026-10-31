@@ -70,6 +70,9 @@ bun run test:native               # Tauri-крейт: IPC, права, акту�
 bun run update:bindings           # перегенерировать apps/native/src/bindings.ts
 cargo fmt --all --check           # форматирование (CI это проверяет)
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
+bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid (нужен Node.js)
+bun run format                    # oxfmt + cargo fmt: исправляет форматирование
+bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
 bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg
 bun run test:wasm                 # тесты Rust↔JS моста под Node (нужен wasm-bindgen-cli)
@@ -80,7 +83,7 @@ bun run build:native -- --no-bundle   # релизная сборка без у�
 cargo run -p app-cli -- fetch <url> <path>
 ```
 
-Перед завершением задачи прогоните `cargo fmt --all --check`, `bun run test:rust`,
+Перед завершением задачи прогоните `bun run format:check`, `bun run format:check:rust`, `bun run lint`, `bun run test:rust`,
 `bun run typecheck` и `bun run test`; если менялся web — ещё `bun run build:web` (typecheck не ловит
 ошибки плагинов и Tailwind), если менялись `core`, `core-wasm` или `platform-web` — ещё `bun run check:wasm`
 и `bun run test:wasm`; если менялись `src-tauri` или команды — ещё `bun run test:native`.
@@ -101,6 +104,11 @@ cargo run -p app-cli -- fetch <url> <path>
 ## Стиль
 
 - Rust: форматирование `cargo fmt`, ошибки через `thiserror` в библиотеках.
+- TS/TSX/JSON/CSS: форматирует `oxfmt` (`bun run format`), линтит `oxlint` (ADR-0011). Не включайте плагин `react`
+  и правило `solid/imports` (они для React и Solid 1.x). Сгенерированные файлы (`bindings.ts`, `pkg/`) не форматируйте
+  и не линтите: они в `ignorePatterns`.
+- Границы между пакетами заданы правилами `no-restricted-imports` в `.oxlintrc.json`. Новую границу проверяйте
+  намеренным нарушением: шаблоны в стиле gitignore, `*` не пересекает `/`, нужны `**`.
 - TS: strict, `verbatimModuleSyntax`, `noUncheckedIndexedAccess`; tsconfig наследуются от `@app/config`.
 - Комментарии объясняют «почему», а не «что». Следуйте плотности комментариев вокруг.
 
