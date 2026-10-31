@@ -19,3 +19,4 @@
 | [0012](0012-reproducible-dev-environment.md) | Воспроизводимое окружение: закреплённые версии, doctor и devcontainer | принято (часть про Node.js заменена 0013) |
 | [0013](0013-wasm-boundary-tests-in-typescript.md) | Тесты границы WASM на стороне TypeScript, без Node.js | принято |
 | [0014](0014-ui-core-boundary.md) | Граница UI и ядра: единый интерфейс Core, типизированные ошибки и контракт как данные | принято |
+| [0016](0016-web-e2e-in-a-real-browser.md) | Сквозные тесты веба в настоящем браузере | принято |
