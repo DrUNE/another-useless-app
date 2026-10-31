@@ -1,0 +1,23 @@
+{
+  "name": "@app/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@solidjs/web": "catalog:",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@app/config": "workspace:*",
+    "@solidjs/vite-plugin": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}
