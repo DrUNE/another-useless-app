@@ -1,0 +1,31 @@
+{
+  "name": "another-useless-app",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": { "BUN_VERSION": "1.4.4" }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=another-useless-app-target,target=${containerWorkspaceFolder}/target,type=volume",
+    "source=another-useless-app-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=another-useless-app-cargo-registry,target=/usr/local/cargo/registry,type=volume"
+  ],
+  "postCreateCommand": "sudo chown -R vscode:vscode target node_modules /usr/local/cargo/registry && bun install --frozen-lockfile && bun run doctor",
+  "forwardPorts": [5173, 4173],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "oxc.oxc-vscode",
+        "bradlc.vscode-tailwindcss",
+        "tauri-apps.tauri-vscode"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "oxc.oxc-vscode",
+        "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" }
+      }
+    }
+  }
+}

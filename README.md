@@ -63,18 +63,32 @@ web, native →  app (общий UI)
 
 Решения и компромиссы зафиксированы в [`docs/adr/`](docs/adr/README.md).
 
-## Требования
+## Окружение разработки
 
-- [Rust](https://rustup.rs) (stable, проверено на 1.99)
-- [bun](https://bun.sh) 1.4+
-- для WASM-сборки ядра: таргет `wasm32-unknown-unknown` (`rustup target add wasm32-unknown-unknown`)
-  и `wasm-bindgen-cli` **той же версии, что крейт `wasm-bindgen` в `Cargo.lock`**
-  (`cargo install wasm-bindgen-cli --version <версия> --locked`; версию покажет `cargo pkgid wasm-bindgen`)
-- для desktop (Tauri) на Linux: WebKitGTK 4.1, GTK 3, libsoup 3, librsvg, openssl, dbus и libxdo с заголовками.
-  Debian/Ubuntu: `libwebkit2gtk-4.1-dev libsoup-3.0-dev libgtk-3-dev librsvg2-dev libssl-dev libdbus-1-dev libxdo-dev`.
-  ALT: `libwebkit2gtk4.1-devel libsoup3.0-devel libgtk+3-devel librsvg-devel libssl-devel libdbus-devel xdotool-devel`.
-  Остальные цели (CLI, WASM, web) эти пакеты не требуют
-- для mobile (позже): Android SDK/NDK; для iOS нужен macOS
+Версии инструментов закреплены в файлах репозитория, а не в README: `rust-toolchain.toml` (Rust, таргет wasm32,
+компоненты), `package.json` → `packageManager` (bun), `Cargo.lock` (версия `wasm-bindgen-cli`) и
+`tools/system-deps/debian.txt` (системные пакеты). CI, контейнер и `bun run doctor` читают эти же файлы.
+Менеджер пакетов, скрипты, сборка, линтер и тесты работают на bun, pnpm не нужен. Настоящий Node.js требуется
+только для `bun run test:wasm` (`wasm-bindgen-test-runner` не работает на шиме `node` от bun); `doctor` предупредит.
+
+**Вариант 1. Devcontainer** (Linux-контейнер со всем внутри; нужен Docker или Podman и VS Code либо другая среда с поддержкой
+devcontainer): откройте репозиторий и выберите «Reopen in Container». Работают web, WASM, CLI, тесты, lint, сборка и тесты Tauri
+под Linux (в образе есть Node.js только ради `test:wasm`). Не работает в контейнере: окно Tauri (нужен проброс графики), сборка Tauri под Windows и macOS (для этого CI),
+Android-эмулятор (нужен KVM) и iOS.
+
+**Вариант 2. Локально:**
+
+```sh
+rustup toolchain install   # в корне репозитория: Rust, wasm32 и компоненты из rust-toolchain.toml
+bun install
+bun run doctor             # что ещё не хватает; подскажет команду для вашей ОС
+```
+
+`bun run doctor` ничего не меняет в системе. Группы можно выбрать: `bun run doctor core wasm native`.
+Для desktop (Tauri) нужны системные библиотеки (WebKitGTK, GTK 3 и др.): на Debian и Ubuntu это
+`xargs -a tools/system-deps/debian.txt sudo apt-get install -y`, для остальных систем см.
+[prerequisites Tauri](https://v2.tauri.app/start/prerequisites/). CLI, WASM и web эти пакеты не требуют.
+Для mobile (позже): Android SDK/NDK; iOS возможен только на macOS.
 
 ## Команды
 
