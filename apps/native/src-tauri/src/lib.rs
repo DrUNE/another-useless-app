@@ -12,6 +12,12 @@ pub fn specta_builder<R: tauri::Runtime>() -> Builder<R> {
     Builder::<R>::new().commands(collect_commands![commands::save_url])
 }
 
+/// Контекст приложения из `tauri.conf.json` и capabilities. Макрос раскрывается здесь **один раз** на крейт: на macOS он
+/// встраивает `Info.plist` как символ, и второй вызов (например, в тестах) даёт `symbol _EMBED_INFO_PLIST is already defined`.
+fn context<R: tauri::Runtime>() -> tauri::Context<R> {
+    tauri::generate_context!()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = specta_builder::<tauri::Wry>();
@@ -22,7 +28,7 @@ pub fn run() {
             app.manage(AppState::new(app.path().app_data_dir()?));
             Ok(())
         })
-        .run(tauri::generate_context!())
+        .run(context())
         .expect("error while running tauri application");
 }
 
@@ -97,7 +103,7 @@ mod tests {
         let app = mock_builder()
             .manage(AppState::new(sandbox))
             .invoke_handler(specta_builder::<MockRuntime>().invoke_handler())
-            .build(tauri::generate_context!())
+            .build(context())
             .expect("failed to build app");
         let webview = WebviewWindowBuilder::new(&app, "main", Default::default())
             .build()
@@ -108,7 +114,14 @@ mod tests {
                 cmd: "save_url".into(),
                 callback: CallbackFn(0),
                 error: CallbackFn(1),
-                url: "tauri://localhost".parse().unwrap(),
+                // Адрес источника запроса зависит от ОС (так в документации tauri::test).
+                url: if cfg!(any(windows, target_os = "android")) {
+                    "http://tauri.localhost"
+                } else {
+                    "tauri://localhost"
+                }
+                .parse()
+                .unwrap(),
                 body: InvokeBody::Json(args),
                 headers: Default::default(),
                 invoke_key: INVOKE_KEY.to_string(),
