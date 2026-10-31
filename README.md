@@ -1,5 +1,7 @@
 # another-useless-app
 
+[![CI](https://github.com/DrUNE/another-useless-app/actions/workflows/ci.yml/badge.svg)](https://github.com/DrUNE/another-useless-app/actions/workflows/ci.yml)
+
 Учебный проект: приложение, которое ничего полезного не делает, зато показывает, как строить
 кроссплатформенные приложения с одним ядром и независимыми сборками под каждую платформу.
 
