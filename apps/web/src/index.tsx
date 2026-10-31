@@ -1,5 +1,6 @@
 import { App, createStubService } from "@app/app";
 import { render } from "@solidjs/web";
+
 import "./index.css";
 
 // Пока веб работает на заглушке; настоящее ядро (WASM) подключается здесь же (#5).

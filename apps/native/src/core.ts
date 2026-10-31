@@ -1,4 +1,5 @@
 import type { FetcherService } from "@app/app";
+
 import { type CommandError, commands } from "./bindings";
 
 /** Человекочитаемый текст для типизированной ошибки Rust: интерфейс не разбирает строки, а смотрит на `kind`. */

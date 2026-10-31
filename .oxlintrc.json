@@ -1,0 +1,108 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc", "import", "jsx-a11y"],
+  // Правила Solid (реактивность, привычки из React). Плагин написан под Solid 1.x: правило `solid/imports`
+  // не включаем (оно переписывало бы импорты под 1.x), остальные проверены на коде Solid 2.
+  "jsPlugins": ["eslint-plugin-solid"],
+  "categories": { "correctness": "error" },
+  "env": { "es2023": true },
+  "ignorePatterns": ["**/dist", "packages/core-wasm/pkg", "apps/native/src/bindings.ts"],
+  "rules": {
+    "eqeqeq": "error",
+    "no-console": "warn",
+    "typescript/no-explicit-any": "error",
+    // Требуют типов (--type-aware): ловят забытый await и лишние проверки.
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "import/no-cycle": "error",
+    "import/no-self-import": "error",
+    "import/no-duplicates": "error",
+    "solid/no-destructure": "error",
+    "solid/reactivity": "error",
+    "solid/components-return-once": "error",
+    "solid/prefer-for": "error",
+    "solid/no-react-specific-props": "error",
+    "solid/no-react-deps": "error",
+    "solid/no-innerhtml": "error"
+  },
+  "overrides": [
+    {
+      // Границы из ADR-0006 и AGENTS.md: общий UI не знает, какое ядро ему подставят.
+      "files": ["packages/app/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@tauri-apps/**"],
+                "message": "UI не зависит от Tauri: ядро приходит из точки входа."
+              },
+              {
+                "group": [
+                  "@app/core-wasm",
+                  "@app/core-wasm/**",
+                  "@app/platform-web",
+                  "@app/platform-web/**",
+                  "@app/web",
+                  "@app/native"
+                ],
+                "message": "UI не знает, какое ядро ему подставят (ADR-0006)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Порты не зависят ни от чего платформенного.
+      "files": ["packages/platform/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@app/**", "@tauri-apps/**", "solid-js", "solid-js/**", "@solidjs/**"],
+                "message": "Пакет портов ни от чего не зависит (ADR-0003)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Приложения не зависят друг от друга: общее выносится в packages/*.
+      "files": ["apps/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@app/web",
+                  "@app/native",
+                  "**/apps/**",
+                  "../../web/**",
+                  "../../native/**",
+                  "../web/**",
+                  "../native/**"
+                ],
+                "message": "Приложения не ссылаются друг на друга (ADR-0006)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // В тестах console допустим.
+      "files": ["**/*.test.ts"],
+      "rules": { "no-console": "off" }
+    }
+  ]
+}

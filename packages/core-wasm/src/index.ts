@@ -1,4 +1,5 @@
 import { requirePort, type Platform } from "@app/platform";
+
 import init, { saveUrl } from "../pkg/app_core_wasm.js";
 import { fsBridge, httpBridge } from "./bridge";
 

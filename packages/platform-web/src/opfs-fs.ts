@@ -64,7 +64,10 @@ export function createOpfsFs(): Fs {
       if (name === undefined) return true;
       try {
         const parent = await dir(parts, false);
-        for (const get of [() => parent.getFileHandle(name), () => parent.getDirectoryHandle(name)]) {
+        for (const get of [
+          () => parent.getFileHandle(name),
+          () => parent.getDirectoryHandle(name),
+        ]) {
           try {
             await get();
             return true;

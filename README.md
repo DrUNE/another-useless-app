@@ -83,6 +83,9 @@ bun install                  # установить JS-зависимости
 
 bun run test:rust            # тесты Rust без Tauri (`cargo test --workspace --exclude app-native`)
 bun run typecheck            # typecheck TS-пакетов (Rust не нужен)
+bun run lint                 # oxlint: типы, границы пакетов, правила Solid (нужен Node.js для плагина)
+bun run format               # oxfmt (TS/JSON/CSS/HTML) и cargo fmt (Rust)
+bun run format:check         # проверка форматирования TS без записи
 bun run test                 # TS-тесты (vitest)
 
 bun run build:wasm           # собрать ядро в WASM: packages/core-wasm/pkg

@@ -1,4 +1,5 @@
 import { createSignal, Show } from "solid-js";
+
 import { Field } from "./Field";
 import type { FetcherService, SaveReport } from "./service";
 
@@ -27,7 +28,7 @@ export function SaveForm(props: {
   };
 
   return (
-    <form class="flex flex-col gap-4" onSubmit={submit}>
+    <form class="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
       <Field label="URL" value={url()} onInput={setUrl} placeholder="https://…" />
       <Field label="Путь для сохранения" value={path()} onInput={setPath} />
       <button
@@ -41,7 +42,13 @@ export function SaveForm(props: {
       >
         {busy() ? "Сохраняем…" : "Скачать и сохранить"}
       </button>
-      <Show when={error()}>{(message) => <p role="alert" class="text-sm text-red-600">{message()}</p>}</Show>
+      <Show when={error()}>
+        {(message) => (
+          <p role="alert" class="text-sm text-red-600">
+            {message()}
+          </p>
+        )}
+      </Show>
     </form>
   );
 }

@@ -7,5 +7,8 @@
     "./tsconfig.dom.json": "./tsconfig.dom.json",
     "./tsconfig.node.json": "./tsconfig.node.json",
     "./theme.css": "./theme.css"
+  },
+  "devDependencies": {
+    "tailwindcss": "catalog:"
   }
 }
