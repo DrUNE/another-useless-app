@@ -1,27 +1,17 @@
-import type { FetcherService } from "@app/app";
+import { type Core, type CoreError, CoreException } from "@app/core-api";
 
 import { type CommandError, commands } from "./bindings";
 
-/** Человекочитаемый текст для типизированной ошибки Rust: интерфейс не разбирает строки, а смотрит на `kind`. */
-function describe(e: CommandError): string {
-  switch (e.kind) {
-    case "invalidPath":
-      return `Недопустимый путь: ${e.path}`;
-    case "io":
-      return `Ошибка файла: ${e.message}`;
-    case "network":
-      return `Ошибка сети: ${e.message}`;
-    case "status":
-      return `Сервер ответил кодом ${e.code}`;
-  }
-}
+// Компилятор следит, чтобы форма ошибки Rust совпадала с контрактом: добавили вариант в Rust, пересоздали привязки
+// (`bun run update:bindings`), и сборка TS упадёт здесь, пока контракт и интерфейс не обновят.
+const toCoreError = (error: CommandError): CoreError => error;
 
-/** Сервис поверх IPC: вызывает Rust-команды, сгенерированные из `src-tauri`. */
-export function createIpcService(): FetcherService {
+/** Ядро через IPC: те же Rust-функции, что в CLI, вызываются командой Tauri (ADR-0009). */
+export function createIpcCore(): Core {
   return {
     async saveUrl(url, path) {
       const result = await commands.saveUrl(url, path);
-      if (result.status === "error") throw new Error(describe(result.error));
+      if (result.status === "error") throw new CoreException(toCoreError(result.error));
       return result.data;
     },
   };

@@ -3,13 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "bun run --filter @app/core-wasm build && vite",
+    "build": "bun run --filter @app/core-wasm build && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json"
+    "check": "bun run --filter @app/core-wasm build && tsc -p tsconfig.json"
   },
   "dependencies": {
     "@app/app": "workspace:*",
+    "@app/core-wasm": "workspace:*",
+    "@app/platform-web": "workspace:*",
     "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },

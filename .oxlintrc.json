@@ -45,12 +45,31 @@
                 "group": [
                   "@app/core-wasm",
                   "@app/core-wasm/**",
+                  "@app/platform",
+                  "@app/platform/**",
                   "@app/platform-web",
                   "@app/platform-web/**",
                   "@app/web",
                   "@app/native"
                 ],
                 "message": "UI не знает, какое ядро ему подставят (ADR-0006)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Контракт ядра ни от чего не зависит: на него опираются и UI, и все реализации.
+      "files": ["packages/core-api/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@app/**", "@tauri-apps/**", "solid-js", "solid-js/**", "@solidjs/**"],
+                "message": "Контракт ядра ни от чего не зависит (ADR-0014)."
               }
             ]
           }

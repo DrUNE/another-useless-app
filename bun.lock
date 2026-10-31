@@ -16,6 +16,7 @@
       "name": "@app/native",
       "dependencies": {
         "@app/app": "workspace:*",
+        "@app/core-api": "workspace:*",
         "@solidjs/web": "catalog:",
         "@tauri-apps/api": "catalog:",
         "solid-js": "catalog:",
@@ -28,12 +29,15 @@
         "tailwindcss": "catalog:",
         "typescript": "catalog:",
         "vite": "catalog:",
+        "vitest": "catalog:",
       },
     },
     "apps/web": {
       "name": "@app/web",
       "dependencies": {
         "@app/app": "workspace:*",
+        "@app/core-wasm": "workspace:*",
+        "@app/platform-web": "workspace:*",
         "@solidjs/web": "catalog:",
         "solid-js": "catalog:",
       },
@@ -49,12 +53,14 @@
     "packages/app": {
       "name": "@app/app",
       "dependencies": {
+        "@app/core-api": "workspace:*",
         "@solidjs/web": "catalog:",
         "solid-js": "catalog:",
       },
       "devDependencies": {
         "@app/config": "workspace:*",
         "typescript": "catalog:",
+        "vitest": "catalog:",
       },
     },
     "packages/config": {
@@ -63,9 +69,18 @@
         "tailwindcss": "catalog:",
       },
     },
+    "packages/core-api": {
+      "name": "@app/core-api",
+      "devDependencies": {
+        "@app/config": "workspace:*",
+        "typescript": "catalog:",
+        "vitest": "catalog:",
+      },
+    },
     "packages/core-wasm": {
       "name": "@app/core-wasm",
       "dependencies": {
+        "@app/core-api": "workspace:*",
         "@app/platform": "workspace:*",
       },
       "devDependencies": {
@@ -125,6 +140,8 @@
     "@app/app": ["@app/app@workspace:packages/app"],
 
     "@app/config": ["@app/config@workspace:packages/config"],
+
+    "@app/core-api": ["@app/core-api@workspace:packages/core-api"],
 
     "@app/core-wasm": ["@app/core-wasm@workspace:packages/core-wasm"],
 

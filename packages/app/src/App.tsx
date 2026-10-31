@@ -1,11 +1,11 @@
+import type { SaveReport } from "@app/core-api";
 import { createSignal, Show } from "solid-js";
 
 import { History } from "./History";
 import { SaveForm } from "./SaveForm";
-import type { FetcherService, SaveReport } from "./service";
 
-// Сервис приходит снаружи: какое именно ядро (WASM, IPC, заглушка) — решает точка входа приложения.
-export function App(props: { service: FetcherService; subtitle?: string }) {
+// Ядро приходит из контекста (`CoreContext`): какое именно, WASM или IPC, решает точка входа приложения.
+export function App(props: { subtitle?: string }) {
   const [entries, setEntries] = createSignal<SaveReport[]>([]);
 
   return (
@@ -14,10 +14,7 @@ export function App(props: { service: FetcherService; subtitle?: string }) {
         <h1 class="text-2xl font-semibold">another-useless-app</h1>
         <Show when={props.subtitle}>{(text) => <p class="text-sm text-ink/60">{text()}</p>}</Show>
       </header>
-      <SaveForm
-        service={props.service}
-        onSaved={(report) => setEntries((list) => [report, ...list])}
-      />
+      <SaveForm onSaved={(report) => setEntries((list) => [report, ...list])} />
       <History entries={entries()} />
     </main>
   );

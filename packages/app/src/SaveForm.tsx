@@ -1,12 +1,12 @@
-import { createSignal, Show } from "solid-js";
+import type { SaveReport } from "@app/core-api";
+import { createSignal, Show, useContext } from "solid-js";
 
+import { CoreContext } from "./core-context";
+import { describeError } from "./errors";
 import { Field } from "./Field";
-import type { FetcherService, SaveReport } from "./service";
 
-export function SaveForm(props: {
-  service: FetcherService;
-  onSaved: (report: SaveReport) => void;
-}) {
+export function SaveForm(props: { onSaved: (report: SaveReport) => void }) {
+  const core = useContext(CoreContext);
   // Тело компонента выполняется один раз: сигналы создаются здесь единожды,
   // а обновляются только те места JSX, где вызван url(), path(), busy() или error().
   const [url, setUrl] = createSignal("https://example.com");
@@ -19,9 +19,9 @@ export function SaveForm(props: {
     setBusy(true);
     setError(undefined);
     try {
-      props.onSaved(await props.service.saveUrl(url(), path()));
+      props.onSaved(await core.saveUrl(url(), path()));
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(describeError(err));
     } finally {
       setBusy(false);
     }
