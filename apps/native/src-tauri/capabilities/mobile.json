@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/mobile-schema.json",
+  "identifier": "mobile",
+  "description": "Разрешения главного окна на мобильных платформах. Пока совпадают с desktop, но живут отдельно: у mobile свои ограничения.",
+  "windows": ["main"],
+  "platforms": ["android", "iOS"],
+  "permissions": ["allow-save-url"]
+}

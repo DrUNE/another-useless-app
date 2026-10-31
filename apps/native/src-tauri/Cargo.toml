@@ -1,0 +1,26 @@
+[package]
+name = "app-native"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[lib]
+name = "app_native_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+app-core.workspace = true
+app-platform-native.workspace = true
+tauri = { version = "2.12", features = [] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+specta = { version = "=2.0.0-rc.26", features = ["derive"] }
+specta-typescript = "0.0.13"
+tauri-specta = { version = "=2.0.0-rc.26", features = ["derive", "typescript"] }
+
+[dev-dependencies]
+tauri = { version = "2.12", features = ["test"] }
+serde_json = "1"
