@@ -8,7 +8,7 @@ import {
 } from "./parse";
 
 export type Group = "core" | "wasm" | "native";
-export type Status = "ok" | "warn" | "fail" | "skip";
+export type Status = "ok" | "fail" | "skip";
 
 export interface Outcome {
   status: Status;
@@ -130,22 +130,6 @@ export const checks: Check[] = [
         "Cargo.lock",
         `cargo install wasm-bindgen-cli --version ${expected ?? "<версия из Cargo.lock>"} --locked`,
       );
-    },
-  },
-  {
-    group: "wasm",
-    title: "Node.js (нужен только для `bun run test:wasm`)",
-    run: (ctx) => {
-      // `bun run` подставляет свой `node`, если настоящего нет, а wasm-bindgen-test-runner на нём не работает.
-      const probe = ctx.run("node", ["-p", "process.versions.bun ? 'bun' : process.version"]);
-      const answer = probe.output.trim();
-      if (probe.ok && answer.startsWith("v")) return { status: "ok", detail: answer };
-      return {
-        status: "warn",
-        detail:
-          probe.ok && answer === "bun" ? "найден только шим bun, а не Node.js" : "не установлен",
-        hint: "нужен только для тестов моста WASM (wasm-bindgen-test-runner); остальное работает на bun",
-      };
     },
   },
   {
