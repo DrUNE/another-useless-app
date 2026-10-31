@@ -11,3 +11,4 @@
 | [0004](0004-ports-futures-not-send.md) | Futures в портах без требования `Send` | принято |
 | [0005](0005-bun-workspaces-with-catalog.md) | bun workspaces с `catalog`, без Turborepo | принято |
 | [0006](0006-independent-builds.md) | Независимые сборки для каждой цели | принято |
+| [0007](0007-protect-main-squash-only.md) | Защита `main` и слияние только через squash | принято |
