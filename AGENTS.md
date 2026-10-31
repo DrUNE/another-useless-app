@@ -30,10 +30,12 @@
 - `packages/platform-web` — адаптеры портов для браузера (OPFS, `fetch`).
 - `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
-- `apps/web` — Vite + Solid 2 + Tailwind. Пока работает с заглушкой сервиса (`src/service.ts`);
-  настоящее ядро подключим в #5.
-- Планируются: `apps/native` (Tauri 2, `src-tauri` добавить в `members` корневого `Cargo.toml`),
-  `packages/ui`, `packages/app`, `packages/features/*`.
+- `packages/app` — общий UI на Solid. Сервис (`FetcherService`) приходит пропсом: какое ядро, решает точка входа.
+- `apps/web` — тонкая точка входа: Vite + Solid 2 + Tailwind. Пока на заглушке `createStubService()`;
+  настоящее ядро (WASM) подключим в #5.
+- `apps/native` — Tauri 2. `src/` — точка входа с IPC-сервисом (`core.ts`) и сгенерированными привязками
+  (`bindings.ts`); `src-tauri/` — Rust: команды (`commands.rs`), capabilities, `tauri.conf.json`.
+- Планируются: `packages/ui`, `packages/features/*`.
 
 ## Жёсткие правила архитектуры
 
@@ -42,7 +44,8 @@
 2. Ввод-вывод только через порты. Новая платформенная возможность = новый порт в `core`
    (и в `packages/platform` для TS) + адаптеры в `platform-*`.
 3. Futures в портах без требования `Send` (в wasm32 они `!Send`).
-4. Адаптеры подключает только точка входа приложения (`cli`, `src-tauri`, `apps/web`).
+4. Адаптеры и конкретное ядро подключает только точка входа приложения (`cli`, `src-tauri`, `apps/web`,
+   `apps/native/src`). `packages/app` ядра не знает. Приложения не зависят друг от друга.
 5. Нет проверок вида `if (isTauri)` в прикладном коде: отличия выражаются через наличие порта
    (`hasCapability` / `requirePort`).
 6. Сборки независимы: CLI не должен требовать Node/Vite, web — Tauri. (Web требует Rust, таргет wasm32
@@ -53,12 +56,18 @@
    (`typescript_custom_section`), TS-типы берутся оттуда, а не пишутся вручную.
 9. Один порт не значит одинаковое поведение: в вебе `Http` подчиняется CORS, а OPFS не является
    файловой системой пользователя. Не обещайте в UI и текстах нативной семантики для web.
+10. Нативное приложение (ADR-0009, ADR-0010): команды Tauri объявлены в `build.rs` и разрешены в обеих
+    capabilities (`allow-<имя>`); пути из UI недоверенные и ограничены каталогом данных (`resolve()`);
+    TS-привязки генерируются (`bun run update:bindings`), руками `bindings.ts` не правят; системные плагины
+    (`fs`, `http`) не подключаются.
 
 ## Команды
 
 ```sh
 bun install
-cargo test --workspace            # Rust-тесты
+bun run test:rust                 # Rust-тесты без Tauri (`--exclude app-native`; WebKit не нужен)
+bun run test:native               # Tauri-крейт: IPC, права, актуальность привязок (нужны системные библиотеки)
+bun run update:bindings           # перегенерировать apps/native/src/bindings.ts
 cargo fmt --all --check           # форматирование (CI это проверяет)
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
 bun run test                      # TS-тесты (vitest)
@@ -66,13 +75,15 @@ bun run check:wasm                # сборка WASM + typecheck кода, за
 bun run test:wasm                 # тесты Rust↔JS моста под Node (нужен wasm-bindgen-cli)
 bun run dev:web                   # dev-сервер web (Vite)
 bun run build:web                 # продакшен-сборка web в apps/web/dist
+bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)
+bun run build:native -- --no-bundle   # релизная сборка без упаковки (как в CI)
 cargo run -p app-cli -- fetch <url> <path>
 ```
 
-Перед завершением задачи прогоните `cargo fmt --all --check`, `cargo test --workspace`,
+Перед завершением задачи прогоните `cargo fmt --all --check`, `bun run test:rust`,
 `bun run typecheck` и `bun run test`; если менялся web — ещё `bun run build:web` (typecheck не ловит
 ошибки плагинов и Tailwind), если менялись `core`, `core-wasm` или `platform-web` — ещё `bun run check:wasm`
-и `bun run test:wasm`.
+и `bun run test:wasm`; если менялись `src-tauri` или команды — ещё `bun run test:native`.
 Если что-то не удалось проверить (например, нет wasm-таргета), прямо скажите об этом.
 
 ## Стек и версии
@@ -106,7 +117,8 @@ cargo run -p app-cli -- fetch <url> <path>
    небольшие и по одной идее.
 4. **Pull request.** Заполняйте шаблон, указывайте `Closes #N`. Заголовок PR — в стиле коммита,
    на английском; описание — на русском. В «Не проверено» честно перечисляйте пропущенное.
-5. **Слияние.** Только squash, только после зелёных проверок `rust (cargo test)` и `ts (typecheck)`;
+5. **Слияние.** Только squash, только после зелёных проверок `rust (cargo test)`, `ts (typecheck)`,
+   `wasm (build and test)` и `native (desktop build)`;
    ветка удаляется автоматически. Это закреплено настройками GitHub (см. `docs/adr/0007-*`):
    прямой пуш в `main` невозможен. Имена проверок совпадают с именами job в `ci.yml`; при
    переименовании job обновите защиту ветки. Roadmap обновляется сам, когда закрывается issue.
