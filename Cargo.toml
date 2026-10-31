@@ -1,7 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*"]
-# apps/native/src-tauri добавляется в members после `tauri init`.
+members = ["crates/*", "apps/native/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

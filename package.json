@@ -15,8 +15,6 @@
       "vitest": "5.0.5",
       "@tauri-apps/cli": "2.12.4",
       "@tauri-apps/api": "2.12.4",
-      "@tauri-apps/plugin-fs": "2.7.1",
-      "@tauri-apps/plugin-http": "2.8.3",
       "@types/bun": "1.4.4",
       "@types/node": "26.6.6"
     }
@@ -26,7 +24,9 @@
     "build:web": "bun run --filter @app/web build",
     "dev:cli": "cargo run -p app-cli --",
     "build:cli": "cargo build -p app-cli --release",
-    "test:rust": "cargo test --workspace",
+    "test:rust": "cargo test --workspace --exclude app-native",
+    "test:native": "cargo test -p app-native",
+    "update:bindings": "UPDATE_BINDINGS=1 cargo test -p app-native bindings",
     "test:wasm": "cargo test -p app-core-wasm --target wasm32-unknown-unknown",
     "build:wasm": "bun run --filter @app/core-wasm build",
     "check:wasm": "bun run --filter @app/core-wasm check",
