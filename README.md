@@ -106,6 +106,7 @@ bun run test                 # TS-тесты (vitest)
 bun run build:wasm           # собрать ядро в WASM: packages/core-wasm/pkg
 bun run check:wasm           # сборка WASM + typecheck кода, который его импортирует
 bun run test:wasm            # тесты границы Rust ↔ JS на реальном WASM (собирает его сам)
+bun run test:e2e            # сквозной сценарий веба в браузере (нужен Chrome/Chromium; путь в CHROME_PATH)
 
 bun run dev:web              # web: dev-сервер Vite
 bun run build:web            # web: продакшен-сборка в apps/web/dist

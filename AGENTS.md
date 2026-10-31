@@ -31,6 +31,7 @@
 - `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
 - `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
+- `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
 - `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
   и `defineCoreContract` для тестов. Ни от чего не зависит.
 - `packages/app` — общий UI на Solid. Знает только `@app/core-api`; ядро берёт из `CoreContext`, его подставляет точка входа.
@@ -87,6 +88,7 @@ bun run format:check              # проверка форматировани�
 bun run test                      # TS-тесты (vitest)
 bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg (core-wasm и web)
 bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
+bun run test:e2e                  # сквозной сценарий веба в настоящем браузере (ADR-0016; нужен Chrome/Chromium, CHROME_PATH)
 bun run dev:web                   # dev-сервер web (Vite; сначала собирает WASM)
 bun run build:web                 # продакшен-сборка web в apps/web/dist
 bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)

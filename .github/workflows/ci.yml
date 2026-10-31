@@ -69,6 +69,10 @@ jobs:
       - run: bun run test:wasm
       # Web использует WASM-ядро, поэтому собирается здесь, а не в job `ts` (ADR-0014).
       - run: bun run build:web
+      # Сквозной сценарий в настоящем браузере (Chrome есть на раннере). Без браузера тест падает, а не пропускается.
+      - run: bun run --filter @app/e2e test:e2e
+        env:
+          E2E_REQUIRE_BROWSER: "1"
 
   # Десктоп: Tauri требует системных библиотек, поэтому живёт в своём job (ADR-0010).
   native:
