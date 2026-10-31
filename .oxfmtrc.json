@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "sortImports": true,
+  "sortTailwindcss": { "stylesheet": "./packages/config/theme.css" },
+  "ignorePatterns": [
+    "**/*.md",
+    "apps/native/src/bindings.ts",
+    "apps/native/src-tauri/icons/**",
+    "apps/native/src-tauri/gen/**",
+    "bun.lock",
+    "Cargo.lock"
+  ]
+}

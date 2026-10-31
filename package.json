@@ -1,9 +1,12 @@
 {
   "name": "another-useless-app",
   "private": true,
-  "type": "module",
   "workspaces": {
-    "packages": ["apps/*", "packages/*", "packages/features/*"],
+    "packages": [
+      "apps/*",
+      "packages/*",
+      "packages/features/*"
+    ],
     "catalog": {
       "solid-js": "2.0.0-rc.20",
       "@solidjs/web": "2.0.0-rc.20",
@@ -15,10 +18,14 @@
       "vitest": "5.0.5",
       "@tauri-apps/cli": "2.12.4",
       "@tauri-apps/api": "2.12.4",
+      "oxlint": "1.90.0",
+      "oxfmt": "0.75.0",
+      "oxlint-tsgolint": "7.0.2005",
       "@types/bun": "1.4.4",
       "@types/node": "26.6.6"
     }
   },
+  "type": "module",
   "scripts": {
     "dev:web": "bun run --filter @app/web dev",
     "build:web": "bun run --filter @app/web build",
@@ -33,9 +40,17 @@
     "dev:native": "bun run --filter @app/native tauri dev",
     "build:native": "bun run --filter @app/native tauri build",
     "typecheck": "bun run --filter '*' typecheck",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt && cargo fmt --all",
+    "format:check": "oxfmt --check",
+    "format:check:rust": "cargo fmt --all --check",
     "test": "bun run --filter '*' test"
   },
   "devDependencies": {
+    "eslint-plugin-solid": "0.18.1",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:"
   }
 }
