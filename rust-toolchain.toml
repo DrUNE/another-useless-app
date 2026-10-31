@@ -1,0 +1,7 @@
+# Единственный источник версии Rust: его читают rustup локально, CI и devcontainer.
+# Обновлять осознанно (`channel`), а не плавающим `stable`: иначе сборка зависит от дня запуска.
+[toolchain]
+channel = "1.99.1"
+profile = "minimal"
+components = ["rustfmt", "rust-src"]
+targets = ["wasm32-unknown-unknown"]

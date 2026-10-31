@@ -21,9 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
+      - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
       # app-native тянет WebKitGTK и собирается в отдельном job (ADR-0010).
@@ -36,7 +34,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4
+          bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run lint
@@ -49,9 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
+      - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       # Версия CLI обязана совпадать с крейтом wasm-bindgen: берём её из Cargo.lock, а не дублируем.
       - id: wbg
@@ -64,7 +60,7 @@ jobs:
       - run: cargo test -p app-core-wasm --target wasm32-unknown-unknown --locked
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4
+          bun-version-file: package.json
       - run: bun install --frozen-lockfile
       # Собирает WASM и проверяет TS-типы, сгенерированные wasm-bindgen.
       - run: bun run check:wasm
@@ -75,16 +71,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Список пакетов один на CI, devcontainer и подсказки `bun run doctor`.
       - run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libwebkit2gtk-4.1-dev libsoup-3.0-dev libgtk-3-dev librsvg2-dev \
-            libssl-dev libdbus-1-dev libxdo-dev
-      - uses: dtolnay/rust-toolchain@stable
+          xargs -a tools/system-deps/debian.txt sudo apt-get install -y --no-install-recommends
+      - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.4
+          bun-version-file: package.json
       - run: bun install --frozen-lockfile
       # Тесты IPC и проверка актуальности TS-привязок (ADR-0009).
       - run: cargo test -p app-native --locked

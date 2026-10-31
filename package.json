@@ -5,7 +5,8 @@
     "packages": [
       "apps/*",
       "packages/*",
-      "packages/features/*"
+      "packages/features/*",
+      "tools/*"
     ],
     "catalog": {
       "solid-js": "2.0.0-rc.20",
@@ -44,7 +45,8 @@
     "format": "oxfmt && cargo fmt --all",
     "format:check": "oxfmt --check",
     "format:check:rust": "cargo fmt --all --check",
-    "test": "bun run --filter '*' test"
+    "test": "bun run --filter '*' test",
+    "doctor": "bun tools/doctor/src/index.ts"
   },
   "devDependencies": {
     "eslint-plugin-solid": "0.18.1",
@@ -52,5 +54,6 @@
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
     "typescript": "catalog:"
-  }
+  },
+  "packageManager": "bun@1.4.4"
 }
