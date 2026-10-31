@@ -1,0 +1,37 @@
+{
+  "name": "another-useless-app",
+  "private": true,
+  "type": "module",
+  "workspaces": {
+    "packages": ["apps/*", "packages/*", "packages/features/*"],
+    "catalog": {
+      "solid-js": "2.0.0-rc.20",
+      "vite-plugin-solid": "3.0.0-next.27",
+      "vite": "8.3.5",
+      "tailwindcss": "4.3.3",
+      "@tailwindcss/vite": "4.3.3",
+      "typescript": "7.0.2",
+      "vitest": "5.0.5",
+      "@tauri-apps/cli": "2.12.4",
+      "@tauri-apps/api": "2.12.4",
+      "@tauri-apps/plugin-fs": "2.7.1",
+      "@tauri-apps/plugin-http": "2.8.3",
+      "@types/bun": "1.4.4",
+      "@types/node": "26.6.6"
+    }
+  },
+  "scripts": {
+    "dev:web": "bun run --filter @app/web dev",
+    "build:web": "bun run --filter @app/web build",
+    "dev:cli": "cargo run -p app-cli --",
+    "build:cli": "cargo build -p app-cli --release",
+    "test:rust": "cargo test --workspace",
+    "dev:native": "bun run --filter @app/native tauri dev",
+    "build:native": "bun run --filter @app/native tauri build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

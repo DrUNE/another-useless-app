@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Источники классов: Tailwind должен видеть все UI-пакеты монорепо. */
+@source "../ui/src";
+@source "../app/src";
+@source "../features";
+
+@theme {
+  --color-surface: oklch(0.99 0 0);
+  --color-surface-muted: oklch(0.96 0 0);
+  --color-ink: oklch(0.2 0 0);
+  --color-accent: oklch(0.62 0.19 260);
+  --color-accent-ink: oklch(0.99 0 0);
+  --radius-control: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: oklch(0.18 0 0);
+    --color-surface-muted: oklch(0.24 0 0);
+    --color-ink: oklch(0.96 0 0);
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@app/config",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tsconfig.dom.json": "./tsconfig.dom.json",
+    "./tsconfig.node.json": "./tsconfig.node.json",
+    "./theme.css": "./theme.css"
+  }
+}

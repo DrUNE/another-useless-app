@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+# apps/native/src-tauri добавляется в members после `tauri init`.
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+app-core = { path = "crates/core" }
+app-platform-native = { path = "crates/platform-native" }

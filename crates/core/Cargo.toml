@@ -1,0 +1,12 @@
+[package]
+name = "app-core"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+# Ядро намеренно без tokio/reqwest/std::fs: должно собираться и в native, и в wasm32.
+[dependencies]
+thiserror = "2"
+
+[dev-dependencies]
+futures = "0.3"
