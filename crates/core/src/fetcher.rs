@@ -49,7 +49,10 @@ mod tests {
 
     impl Http for FakeHttp {
         async fn get(&self, _url: &str) -> Result<HttpResponse, PortError> {
-            Ok(HttpResponse { status: self.0, body: b"hello".to_vec() })
+            Ok(HttpResponse {
+                status: self.0,
+                body: b"hello".to_vec(),
+            })
         }
     }
 
@@ -58,7 +61,11 @@ mod tests {
 
     impl Fs for MemFs {
         async fn read(&self, path: &str) -> Result<Vec<u8>, PortError> {
-            self.0.borrow().get(path).cloned().ok_or_else(|| PortError::Io(format!("no {path}")))
+            self.0
+                .borrow()
+                .get(path)
+                .cloned()
+                .ok_or_else(|| PortError::Io(format!("no {path}")))
         }
         async fn write(&self, path: &str, data: &[u8]) -> Result<(), PortError> {
             self.0.borrow_mut().insert(path.to_owned(), data.to_vec());
@@ -73,7 +80,13 @@ mod tests {
     fn saves_body_on_success() {
         let fs = MemFs::default();
         let report = block_on(save_url(&FakeHttp(200), &fs, "http://x", "a/b.txt")).unwrap();
-        assert_eq!(report, SaveReport { path: "a/b.txt".into(), bytes: 5 });
+        assert_eq!(
+            report,
+            SaveReport {
+                path: "a/b.txt".into(),
+                bytes: 5
+            }
+        );
         assert_eq!(block_on(fs.read("a/b.txt")).unwrap(), b"hello");
     }
 

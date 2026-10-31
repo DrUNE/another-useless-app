@@ -19,15 +19,17 @@ enum Command {
 async fn main() -> std::process::ExitCode {
     let cli = Cli::parse();
     match cli.command {
-        Command::Fetch { url, path } => match save_url(&NativeHttp::new(), &NativeFs, &url, &path).await {
-            Ok(r) => {
-                println!("saved {} bytes to {}", r.bytes, r.path);
-                std::process::ExitCode::SUCCESS
+        Command::Fetch { url, path } => {
+            match save_url(&NativeHttp::new(), &NativeFs, &url, &path).await {
+                Ok(r) => {
+                    println!("saved {} bytes to {}", r.bytes, r.path);
+                    std::process::ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("error: {e}");
+                    std::process::ExitCode::FAILURE
+                }
             }
-            Err(e) => {
-                eprintln!("error: {e}");
-                std::process::ExitCode::FAILURE
-            }
-        },
+        }
     }
 }
