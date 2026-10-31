@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@app/app": "workspace:*",
     "@solidjs/web": "catalog:",
     "solid-js": "catalog:"
   },

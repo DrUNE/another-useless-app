@@ -11,6 +11,7 @@
     "apps/web": {
       "name": "@app/web",
       "dependencies": {
+        "@app/app": "workspace:*",
         "@solidjs/web": "catalog:",
         "solid-js": "catalog:",
       },
@@ -21,6 +22,17 @@
         "tailwindcss": "catalog:",
         "typescript": "catalog:",
         "vite": "catalog:",
+      },
+    },
+    "packages/app": {
+      "name": "@app/app",
+      "dependencies": {
+        "@solidjs/web": "catalog:",
+        "solid-js": "catalog:",
+      },
+      "devDependencies": {
+        "@app/config": "workspace:*",
+        "typescript": "catalog:",
       },
     },
     "packages/config": {
@@ -73,6 +85,8 @@
   },
   "packages": {
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
+
+    "@app/app": ["@app/app@workspace:packages/app"],
 
     "@app/config": ["@app/config@workspace:packages/config"],
 
