@@ -35,7 +35,7 @@
     "test:rust": "cargo test --workspace --exclude app-native",
     "test:native": "cargo test -p app-native",
     "update:bindings": "UPDATE_BINDINGS=1 cargo test -p app-native bindings",
-    "test:wasm": "cargo test -p app-core-wasm --target wasm32-unknown-unknown",
+    "test:wasm": "bun run --filter @app/core-wasm test:wasm",
     "build:wasm": "bun run --filter @app/core-wasm build",
     "check:wasm": "bun run --filter @app/core-wasm check",
     "dev:native": "bun run --filter @app/native tauri dev",

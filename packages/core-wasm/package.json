@@ -8,13 +8,15 @@
   "scripts": {
     "build": "cargo build -p app-core-wasm --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir pkg --out-name app_core_wasm ../../target/wasm32-unknown-unknown/release/app_core_wasm.wasm",
     "check": "bun run build && tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run --exclude src/wasm.test.ts",
+    "test:wasm": "bun run build && vitest run src/wasm.test.ts"
   },
   "dependencies": {
     "@app/platform": "workspace:*"
   },
   "devDependencies": {
     "@app/config": "workspace:*",
+    "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

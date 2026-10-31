@@ -12,8 +12,9 @@
 | [0005](0005-bun-workspaces-with-catalog.md) | bun workspaces с `catalog`, без Turborepo | принято |
 | [0006](0006-independent-builds.md) | Независимые сборки для каждой цели | принято |
 | [0007](0007-protect-main-squash-only.md) | Защита `main` и слияние только через squash | принято |
-| [0008](0008-wasm-boundary.md) | Граница WASM: порты реализуются в JS, артефакты не коммитятся | принято |
+| [0008](0008-wasm-boundary.md) | Граница WASM: порты реализуются в JS, артефакты не коммитятся | принято (тесты моста заменены 0013) |
 | [0009](0009-typed-ipc-tauri-specta.md) | Типизированный IPC через tauri-specta | принято |
 | [0010](0010-native-app-isolation-and-trust.md) | Нативное приложение: изоляция сборки и модель доверия | принято |
 | [0011](0011-oxc-lint-and-format.md) | Линтер и форматтер: oxlint и oxfmt | принято |
-| [0012](0012-reproducible-dev-environment.md) | Воспроизводимое окружение: закреплённые версии, doctor и devcontainer | принято |
+| [0012](0012-reproducible-dev-environment.md) | Воспроизводимое окружение: закреплённые версии, doctor и devcontainer | принято (часть про Node.js заменена 0013) |
+| [0013](0013-wasm-boundary-tests-in-typescript.md) | Тесты границы WASM на стороне TypeScript, без Node.js | принято |

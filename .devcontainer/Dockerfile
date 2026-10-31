@@ -1,11 +1,10 @@
 # Образ разработки: Linux (Debian) со всем, что нужно проекту. Контекст сборки — корень репозитория.
 # Версии не пишутся здесь: Rust берётся из rust-toolchain.toml, wasm-bindgen-cli из Cargo.lock,
 # системные пакеты из tools/system-deps/debian.txt (тот же список использует CI).
-# bun и rustup копируются из официальных образов с закреплённым тегом: без `curl | sh` и без Node.js.
+# bun и rustup копируются из официальных образов с закреплённым тегом: без `curl | sh`. Node.js в образе нет и не нужен.
 ARG BUN_VERSION
 FROM oven/bun:${BUN_VERSION} AS bun
 FROM rust:1-bookworm AS rustup
-FROM node:24-bookworm-slim AS node
 
 FROM mcr.microsoft.com/devcontainers/base:bookworm
 
@@ -28,9 +27,5 @@ RUN rustup toolchain install \
  && cargo install wasm-bindgen-cli --locked \
       --version "$(sed -n '/^name = "wasm-bindgen"$/{n;s/version = "\(.*\)"/\1/p}' Cargo.lock)" \
  && chown -R vscode:vscode /usr/local/rustup /usr/local/cargo
-
-# Node.js нужен ровно одному инструменту: wasm-bindgen-test-runner (`bun run test:wasm`) не работает на шиме bun.
-# Менеджер пакетов, скрипты, сборка и линтер остаются на bun. Копируется один бинарник из официального образа.
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
 
 WORKDIR /

@@ -74,33 +74,6 @@ describe("version checks", () => {
   });
 });
 
-describe("Node.js check", () => {
-  const node = find("Node.js");
-  it("passes with a real Node.js", () => {
-    const outcome = node.run(
-      context({
-        "node -p process.versions.bun ? 'bun' : process.version": {
-          ok: true,
-          output: "v24.22.1\n",
-        },
-      }),
-    );
-    expect(outcome).toMatchObject({ status: "ok", detail: "v24.22.1" });
-  });
-  it("warns, not fails, when only bun's shim answers", () => {
-    const outcome = node.run(
-      context({
-        "node -p process.versions.bun ? 'bun' : process.version": { ok: true, output: "bun\n" },
-      }),
-    );
-    expect(outcome.status).toBe("warn");
-    expect(outcome.detail).toContain("шим bun");
-  });
-  it("warns when node is not installed", () => {
-    expect(node.run(context({})).status).toBe("warn");
-  });
-});
-
 describe("system libraries (Linux)", () => {
   const libs = find("системные библиотеки");
   const allFound = (ctx: Partial<Context> = {}) =>

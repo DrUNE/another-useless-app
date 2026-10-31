@@ -35,10 +35,9 @@ function main() {
   const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
   const ctx = createContext(root);
   const selected = selectChecks(checks, process.argv.slice(2));
-  const icon = { ok: "✓", warn: "!", fail: "✗", skip: "-" } as const;
+  const icon = { ok: "✓", fail: "✗", skip: "-" } as const;
 
   let failed = 0;
-  let warned = 0;
   for (const group of GROUPS) {
     const inGroup = selected.filter((c) => c.group === group);
     if (inGroup.length === 0) continue;
@@ -46,13 +45,11 @@ function main() {
     for (const check of inGroup) {
       const outcome = check.run(ctx);
       if (outcome.status === "fail") failed++;
-      if (outcome.status === "warn") warned++;
       console.log(`  ${icon[outcome.status]} ${check.title}: ${outcome.detail}`);
       if (outcome.status !== "ok" && outcome.hint) console.log(`      → ${outcome.hint}`);
     }
   }
-  const notes = warned > 0 ? ` Предупреждений: ${warned}.` : "";
-  console.log(failed === 0 ? `\nОкружение в порядке.${notes}` : `\nПроблем: ${failed}.${notes}`);
+  console.log(failed === 0 ? "\nОкружение в порядке." : `\nПроблем: ${failed}.`);
   process.exit(failed === 0 ? 0 : 1);
 }
 

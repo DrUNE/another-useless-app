@@ -57,13 +57,14 @@ jobs:
           tool: wasm-bindgen@${{ steps.wbg.outputs.version }}
       # Инвариант ADR-0002: ядро собирается под wasm32.
       - run: cargo check -p app-core --target wasm32-unknown-unknown --locked
-      - run: cargo test -p app-core-wasm --target wasm32-unknown-unknown --locked
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       # Собирает WASM и проверяет TS-типы, сгенерированные wasm-bindgen.
       - run: bun run check:wasm
+      # Тесты границы Rust↔JS: на bun, Node.js не нужен (ADR-0013).
+      - run: bun run test:wasm
 
   # Десктоп: Tauri требует системных библиотек, поэтому живёт в своём job (ADR-0010).
   native:

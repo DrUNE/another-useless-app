@@ -68,12 +68,11 @@ web, native →  app (общий UI)
 Версии инструментов закреплены в файлах репозитория, а не в README: `rust-toolchain.toml` (Rust, таргет wasm32,
 компоненты), `package.json` → `packageManager` (bun), `Cargo.lock` (версия `wasm-bindgen-cli`) и
 `tools/system-deps/debian.txt` (системные пакеты). CI, контейнер и `bun run doctor` читают эти же файлы.
-Менеджер пакетов, скрипты, сборка, линтер и тесты работают на bun, pnpm не нужен. Настоящий Node.js требуется
-только для `bun run test:wasm` (`wasm-bindgen-test-runner` не работает на шиме `node` от bun); `doctor` предупредит.
+Менеджер пакетов, скрипты, сборка, линтер и все тесты работают на bun: ни Node.js, ни pnpm не нужны.
 
 **Вариант 1. Devcontainer** (Linux-контейнер со всем внутри; нужен Docker или Podman и VS Code либо другая среда с поддержкой
 devcontainer): откройте репозиторий и выберите «Reopen in Container». Работают web, WASM, CLI, тесты, lint, сборка и тесты Tauri
-под Linux (в образе есть Node.js только ради `test:wasm`). Не работает в контейнере: окно Tauri (нужен проброс графики), сборка Tauri под Windows и macOS (для этого CI),
+под Linux. Не работает в контейнере: окно Tauri (нужен проброс графики), сборка Tauri под Windows и macOS (для этого CI),
 Android-эмулятор (нужен KVM) и iOS.
 
 **Вариант 2. Локально:**
@@ -104,7 +103,7 @@ bun run test                 # TS-тесты (vitest)
 
 bun run build:wasm           # собрать ядро в WASM: packages/core-wasm/pkg
 bun run check:wasm           # сборка WASM + typecheck кода, который его импортирует
-bun run test:wasm            # тесты моста Rust ↔ JS под Node
+bun run test:wasm            # тесты границы Rust ↔ JS на реальном WASM (собирает его сам)
 
 bun run dev:web              # web: dev-сервер Vite
 bun run build:web            # web: продакшен-сборка в apps/web/dist
