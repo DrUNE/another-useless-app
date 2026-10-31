@@ -75,7 +75,7 @@ bun run format                    # oxfmt + cargo fmt: исправляет фо
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
 bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg
-bun run test:wasm                 # тесты Rust↔JS моста под Node (нужен wasm-bindgen-cli)
+bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
 bun run dev:web                   # dev-сервер web (Vite)
 bun run build:web                 # продакшен-сборка web в apps/web/dist
 bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)
@@ -92,7 +92,7 @@ cargo run -p app-cli -- fetch <url> <path>
 **Окружение (ADR-0012).** `bun run doctor` показывает, чего не хватает; он только читает и ничего не ставит. Версии живут в
 одном месте: Rust — `rust-toolchain.toml`, bun — `package.json` (`packageManager`), `wasm-bindgen-cli` — `Cargo.lock`, системные
 пакеты Debian — `tools/system-deps/debian.txt`. Не прописывайте версии в `ci.yml` и скриптах, читайте из этих файлов (это проверяет
-`tools/doctor/src/consistency.test.ts`). Node.js нужен только для `bun run test:wasm`; для остального bun. Образ — `.devcontainer/`.
+`tools/doctor/src/consistency.test.ts`). Node.js не нужен: все проверки идут на bun (ADR-0013). Проверять «без Node.js» на хосте с `fnm`/`nvm` ненадёжно, `bun run` может найти чужой Node; арбитр — контейнер. Образ — `.devcontainer/`.
 
 ## Стек и версии
 

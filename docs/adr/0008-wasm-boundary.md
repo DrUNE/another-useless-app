@@ -2,6 +2,7 @@
 
 Статус: принято (2026-10-31). Дополняет [ADR-0002](0002-rust-core-wasm-for-web.md),
 [ADR-0003](0003-ports-and-adapters.md) и [ADR-0006](0006-independent-builds.md).
+Пункт 7 в части тестов моста заменён [ADR-0013](0013-wasm-boundary-tests-in-typescript.md).
 
 ## Контекст
 
