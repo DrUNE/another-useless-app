@@ -61,10 +61,12 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      # Собирает WASM и проверяет TS-типы, сгенерированные wasm-bindgen.
+      # Собирает WASM и проверяет TS-типы кода, который его использует (core-wasm и web).
       - run: bun run check:wasm
       # Тесты границы Rust↔JS: на bun, Node.js не нужен (ADR-0013).
       - run: bun run test:wasm
+      # Web использует WASM-ядро, поэтому собирается здесь, а не в job `ts` (ADR-0014).
+      - run: bun run build:web
 
   # Десктоп: Tauri требует системных библиотек, поэтому живёт в своём job (ADR-0010).
   native:

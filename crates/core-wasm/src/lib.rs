@@ -3,9 +3,10 @@
 //!
 //! Futures здесь `!Send` (ждут JS-промисы), и это допустимо: порты не требуют `Send` (ADR-0004).
 
-use app_core::fetcher;
+use app_core::fetcher::{self, FetchError};
+use app_core::path::{InvalidPath, validate_relative};
 use app_core::ports::{Fs, Http, HttpResponse, PortError};
-use js_sys::{Reflect, Uint8Array};
+use js_sys::{Object, Reflect, Uint8Array};
 use wasm_bindgen::prelude::*;
 
 // Контракт со стороны JS. Попадает в сгенерированный .d.ts, чтобы TS-адаптеры
@@ -21,6 +22,12 @@ export interface WasmFs {
 export interface WasmHttp {
   get(url: string): Promise<{ status: number; body: Uint8Array }>;
 }
+/** Отказ `saveUrl`: обычный объект (не Error), форма совпадает с `CommandError` у Tauri. */
+export type WasmError =
+  | { kind: "invalidPath"; path: string }
+  | { kind: "io"; message: string }
+  | { kind: "network"; message: string }
+  | { kind: "status"; code: number };
 "#;
 
 #[wasm_bindgen]
@@ -102,19 +109,45 @@ pub struct SaveReport {
     pub bytes: usize,
 }
 
+/// Ошибка как данные: объект `{ kind, ... }`, чтобы TS различал причины по `kind`, а не разбирал текст.
+fn error_object(kind: &str, field: &str, value: JsValue) -> JsValue {
+    let object = Object::new();
+    for (key, value) in [("kind", JsValue::from_str(kind)), (field, value)] {
+        Reflect::set(&object, &JsValue::from_str(key), &value)
+            .expect("setting a property on a plain object");
+    }
+    object.into()
+}
+
+fn to_js_error(error: FetchError) -> JsValue {
+    match error {
+        FetchError::Status(code) => error_object("status", "code", code.into()),
+        FetchError::InvalidPath(InvalidPath(path)) => {
+            error_object("invalidPath", "path", path.into())
+        }
+        FetchError::Port(PortError::Io(message)) => error_object("io", "message", message.into()),
+        FetchError::Port(PortError::Network(message)) => {
+            error_object("network", "message", message.into())
+        }
+    }
+}
+
 /// Скачать `url` и сохранить в `path` через переданные JS-порты.
+/// `path` приходит из интерфейса и считается недоверенным: правило общее с Tauri и лежит в ядре.
+/// При отказе промис отклоняется значением типа `WasmError`.
 #[wasm_bindgen(js_name = saveUrl)]
 pub async fn save_url(
     fs: JsFs,
     http: JsHttp,
     url: String,
     path: String,
-) -> Result<SaveReport, JsError> {
+) -> Result<SaveReport, JsValue> {
+    validate_relative(&path).map_err(|e| to_js_error(e.into()))?;
     fetcher::save_url(&http, &fs, &url, &path)
         .await
         .map(|r| SaveReport {
             path: r.path,
             bytes: r.bytes,
         })
-        .map_err(|e| JsError::new(&e.to_string()))
+        .map_err(to_js_error)
 }

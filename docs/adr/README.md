@@ -18,3 +18,4 @@
 | [0011](0011-oxc-lint-and-format.md) | Линтер и форматтер: oxlint и oxfmt | принято |
 | [0012](0012-reproducible-dev-environment.md) | Воспроизводимое окружение: закреплённые версии, doctor и devcontainer | принято (часть про Node.js заменена 0013) |
 | [0013](0013-wasm-boundary-tests-in-typescript.md) | Тесты границы WASM на стороне TypeScript, без Node.js | принято |
+| [0014](0014-ui-core-boundary.md) | Граница UI и ядра: единый интерфейс Core, типизированные ошибки и контракт как данные | принято |

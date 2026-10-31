@@ -1,9 +1,10 @@
 //! IPC-команды: тонкая обёртка над use-cases ядра. Логики здесь нет, кроме политики путей,
 //! которая зависит от платформы и поэтому не может жить в `app-core`.
 
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use app_core::fetcher::{self, FetchError};
+use app_core::path::{InvalidPath, validate_relative};
 use app_core::ports::PortError;
 use app_platform_native::{NativeFs, NativeHttp};
 use serde::Serialize;
@@ -52,27 +53,19 @@ impl From<FetchError> for CommandError {
     fn from(e: FetchError) -> Self {
         match e {
             FetchError::Status(code) => Self::Status { code },
+            FetchError::InvalidPath(InvalidPath(path)) => Self::InvalidPath { path },
             FetchError::Port(PortError::Io(message)) => Self::Io { message },
             FetchError::Port(PortError::Network(message)) => Self::Network { message },
         }
     }
 }
 
-/// Путь из интерфейса считается недоверенным: допускаются только относительные пути без `..`.
-/// Иначе скомпрометированная страница могла бы записать файл куда угодно (в вебе это делает песочница OPFS).
+/// Путь из интерфейса считается недоверенным: правило допустимости общее для всех платформ и лежит в
+/// ядре (`app_core::path`), а здесь он только привязывается к каталогу данных приложения.
 /// Символические ссылки внутри `root` не проверяются.
 fn resolve(root: &Path, relative: &str) -> Result<PathBuf, CommandError> {
-    let candidate = Path::new(relative);
-    let safe = !relative.is_empty()
-        && candidate
-            .components()
-            .all(|c| matches!(c, Component::Normal(_) | Component::CurDir));
-    if !safe {
-        return Err(CommandError::InvalidPath {
-            path: relative.to_owned(),
-        });
-    }
-    Ok(root.join(candidate))
+    validate_relative(relative).map_err(|InvalidPath(path)| CommandError::InvalidPath { path })?;
+    Ok(root.join(relative))
 }
 
 #[tauri::command]

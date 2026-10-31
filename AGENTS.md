@@ -30,9 +30,11 @@
 - `packages/platform-web` — адаптеры портов для браузера (OPFS, `fetch`).
 - `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
-- `packages/app` — общий UI на Solid. Сервис (`FetcherService`) приходит пропсом: какое ядро, решает точка входа.
-- `apps/web` — тонкая точка входа: Vite + Solid 2 + Tailwind. Пока на заглушке `createStubService()`;
-  настоящее ядро (WASM) подключим в #5.
+- `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
+  и `defineCoreContract` для тестов. Ни от чего не зависит.
+- `packages/app` — общий UI на Solid. Знает только `@app/core-api`; ядро берёт из `CoreContext`, его подставляет точка входа.
+- `apps/web` — точка входа: создаёт `createCore(createWebPlatform())` (WASM + OPFS + fetch) и кладёт в `CoreContext`.
+  Для dev/build/check собирает WASM, поэтому требует Rust и `wasm-bindgen-cli`.
 - `apps/native` — Tauri 2. `src/` — точка входа с IPC-сервисом (`core.ts`) и сгенерированными привязками
   (`bindings.ts`); `src-tauri/` — Rust: команды (`commands.rs`), capabilities, `tauri.conf.json`.
 - Планируются: `packages/ui`, `packages/features/*`.
@@ -60,6 +62,10 @@
     capabilities (`allow-<имя>`); пути из UI недоверенные и ограничены каталогом данных (`resolve()`);
     TS-привязки генерируются (`bun run update:bindings`), руками `bindings.ts` не правят; системные плагины
     (`fs`, `http`) не подключаются.
+11. Граница UI и ядра (ADR-0014): интерфейс видит только `Core` из `@app/core-api` и получает его через `CoreContext`;
+    отказ всегда `CoreException` с типизированной причиной `kind` (UI переводит её в текст, `describeError`). Новая
+    возможность ядра = метод в `Core` + сценарии в `contract/scenarios.json` + обе реализации (WASM и IPC) + тесты.
+    Политика путей для недоверенных входов одна: `app_core::path::validate_relative`; CLI как доверенный её не применяет.
 
 ## Команды
 
@@ -74,9 +80,9 @@ bun run lint                      # oxlint --type-aware: типы, границ�
 bun run format                    # oxfmt + cargo fmt: исправляет форматирование
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
-bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg
+bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg (core-wasm и web)
 bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
-bun run dev:web                   # dev-сервер web (Vite)
+bun run dev:web                   # dev-сервер web (Vite; сначала собирает WASM)
 bun run build:web                 # продакшен-сборка web в apps/web/dist
 bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)
 bun run build:native -- --no-bundle   # релизная сборка без упаковки (как в CI)

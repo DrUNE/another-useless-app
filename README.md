@@ -16,7 +16,7 @@
 | Цель | Стек | Статус |
 |---|---|---|
 | CLI | Rust (`crates/cli`) | готово |
-| Web | Solid 2 + Tailwind + ядро в WASM | UI с заглушкой; ядро в WASM собирается и проверено в браузере, к UI не подключено |
+| Web | Solid 2 + Tailwind + ядро в WASM | работает: UI на WASM-ядре, файлы в OPFS (проверено в Chromium) |
 | Desktop | Tauri 2 | работает на Linux (IPC, тесты, сборка, rpm); Windows и macOS не проверялись |
 | Mobile | Tauri 2 (Android, iOS) | запланировано |
 
@@ -43,7 +43,8 @@ crates/
   cli/              # бинарник `app`
 packages/
   config/           # общие tsconfig и Tailwind-тема (theme.css)
-  app/              # общий UI на Solid; сервис приходит из точки входа
+  app/              # общий UI на Solid; ядро приходит из контекста (CoreContext)
+  core-api/         # контракт ядра: интерфейс Core, типизированные ошибки, контрактные сценарии
   platform/         # TS-порты Fs/Http/Platform
   platform-web/     # адаптеры портов для браузера: OPFS, fetch
   core-wasm/        # сборка WASM, TS-мост портов, createCore(platform)

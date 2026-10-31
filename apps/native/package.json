@@ -6,10 +6,12 @@
     "dev": "vite",
     "build": "vite build",
     "tauri": "tauri",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@app/app": "workspace:*",
+    "@app/core-api": "workspace:*",
     "@solidjs/web": "catalog:",
     "@tauri-apps/api": "catalog:",
     "solid-js": "catalog:"
@@ -21,6 +23,7 @@
     "@tauri-apps/cli": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

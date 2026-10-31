@@ -2,12 +2,15 @@
 
 use thiserror::Error;
 
+use crate::path::InvalidPath;
 use crate::ports::{Fs, Http, PortError};
 
 #[derive(Debug, Error)]
 pub enum FetchError {
     #[error(transparent)]
     Port(#[from] PortError),
+    #[error(transparent)]
+    InvalidPath(#[from] InvalidPath),
     #[error("unexpected HTTP status {0}")]
     Status(u16),
 }

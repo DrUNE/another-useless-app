@@ -1,6 +1,5 @@
+import type { SaveReport } from "@app/core-api";
 import { For, Show } from "solid-js";
-
-import type { SaveReport } from "./service";
 
 export function History(props: { entries: SaveReport[] }) {
   return (

@@ -1,14 +1,16 @@
-import { App } from "@app/app";
+import { App, CoreContext } from "@app/app";
 import { render } from "@solidjs/web";
 
-import { createIpcService } from "./core";
+import { createIpcCore } from "./core";
 
 import "./index.css";
 
-// Здесь, в точке входа, выбирается ядро: в нативном приложении это Rust через IPC.
+// Точка входа выбирает ядро: в нативном приложении это Rust через IPC. UI о платформе ничего не знает.
 render(
   () => (
-    <App service={createIpcService()} subtitle="Файлы сохраняются в каталог данных приложения." />
+    <CoreContext value={createIpcCore()}>
+      <App subtitle="Файлы сохраняются в каталог данных приложения." />
+    </CoreContext>
   ),
   document.getElementById("root")!,
 );
