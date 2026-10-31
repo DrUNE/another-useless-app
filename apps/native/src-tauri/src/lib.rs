@@ -68,7 +68,13 @@ mod tests {
     }
 
     /// Отдаёт один HTTP-ответ на случайном порту и возвращает URL.
-    fn serve_once(status_line: &'static str, body: &'static str) -> String {
+    fn serve_once(status: u16, body: &str) -> String {
+        let reason = match status {
+            200 => "OK",
+            404 => "Not Found",
+            _ => "Status",
+        };
+        let body = body.to_owned();
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let addr = listener.local_addr().unwrap();
         thread::spawn(move || {
@@ -76,7 +82,7 @@ mod tests {
             let mut buf = [0u8; 2048];
             let _ = stream.read(&mut buf);
             let response = format!(
-                "HTTP/1.1 {status_line}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                "HTTP/1.1 {status} {reason}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
                 body.len()
             );
             stream.write_all(response.as_bytes()).unwrap();
@@ -120,7 +126,7 @@ mod tests {
     #[test]
     fn save_url_over_ipc_writes_inside_the_sandbox() {
         let dir = sandbox("ok");
-        let url = serve_once("200 OK", "hello");
+        let url = serve_once(200, "hello");
         let res = invoke(
             dir.clone(),
             json!({ "url": url, "path": "downloads/a.txt" }),
@@ -136,32 +142,69 @@ mod tests {
         std::fs::remove_dir_all(dir).ok();
     }
 
-    #[test]
-    fn http_error_status_is_a_typed_error_and_writes_nothing() {
-        let dir = sandbox("status");
-        let url = serve_once("404 Not Found", "nope");
-        let err = invoke(dir.clone(), json!({ "url": url, "path": "a.txt" })).unwrap_err();
-
-        assert_eq!(err, json!({ "kind": "status", "code": 404 }));
-        assert!(!dir.join("a.txt").exists());
-        std::fs::remove_dir_all(dir).ok();
+    /// Поля из `expected` обязаны совпасть; остальные поля `actual` (например, текст ошибки ОС) не проверяются.
+    fn is_partial_match(actual: &serde_json::Value, expected: &serde_json::Value) -> bool {
+        expected
+            .as_object()
+            .unwrap()
+            .iter()
+            .all(|(key, value)| actual.get(key) == Some(value))
     }
 
+    /// Общий контракт: тот же `scenarios.json`, что читают TS-тесты WASM-ядра (`@app/core-api/contract`).
+    /// Здесь он проверяет настоящую IPC-команду Tauri, значит, оба входа ведут себя одинаково для одних и тех же случаев.
+    /// Проверка `httpContacted` недоступна (запрос до порта-ловушки не видно), но обращение к сети всё равно обнаружится:
+    /// вместо `invalidPath` вернулась бы `network`.
     #[test]
-    fn paths_outside_the_sandbox_are_rejected_before_any_request() {
-        let dir = sandbox("escape");
-        // Сервер намеренно не запущен: до сети дело дойти не должно.
-        let err = invoke(
-            dir.clone(),
-            json!({ "url": "http://127.0.0.1:9/", "path": "../escape.txt" }),
-        )
-        .unwrap_err();
+    fn ipc_follows_the_shared_core_contract() {
+        const SCENARIOS: &str =
+            include_str!("../../../../packages/core-api/contract/scenarios.json");
+        let scenarios: Vec<serde_json::Value> = serde_json::from_str(SCENARIOS).unwrap();
+        assert!(!scenarios.is_empty());
 
-        assert_eq!(
-            err,
-            json!({ "kind": "invalidPath", "path": "../escape.txt" })
-        );
-        assert!(!dir.parent().unwrap().join("escape.txt").exists());
-        std::fs::remove_dir_all(dir).ok();
+        for (index, scenario) in scenarios.iter().enumerate() {
+            let name = scenario["name"].as_str().unwrap();
+            let path = scenario["path"].as_str().unwrap();
+            let dir = sandbox(&format!("contract-{index}"));
+
+            // Обращение к порту 9 завершается отказом в соединении: так же выглядит «запрос не удался».
+            let url = match scenario["http"].get("status") {
+                Some(status) if scenario["expect"]["error"]["kind"] != "invalidPath" => serve_once(
+                    status.as_u64().unwrap() as u16,
+                    scenario["http"]["body"].as_str().unwrap(),
+                ),
+                _ => "http://127.0.0.1:9/".to_owned(),
+            };
+            if scenario["fs"]["writeFails"] == true {
+                // Запись файла поверх каталога заканчивается ошибкой ОС: это и есть сбой записи.
+                std::fs::create_dir_all(dir.join(path)).unwrap();
+            }
+
+            let result = invoke(dir.clone(), json!({ "url": url, "path": path }));
+            let expect = &scenario["expect"];
+            match (&expect["ok"], &expect["error"]) {
+                (ok, _) if !ok.is_null() => {
+                    let report: serde_json::Value = result.expect(name).deserialize().unwrap();
+                    assert_eq!(&report, ok, "{name}");
+                }
+                (_, error) => {
+                    let actual = result.expect_err(name);
+                    assert!(
+                        is_partial_match(&actual, error),
+                        "{name}: expected {error}, got {actual}"
+                    );
+                }
+            }
+            if expect["written"] == false {
+                assert!(!dir.join(path).exists(), "{name}: a file was written");
+            }
+            if path.starts_with("../") {
+                assert!(
+                    !dir.join(path).exists(),
+                    "{name}: the path escaped the sandbox"
+                );
+            }
+            std::fs::remove_dir_all(dir).ok();
+        }
     }
 }
