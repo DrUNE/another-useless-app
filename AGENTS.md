@@ -30,6 +30,7 @@
 - `packages/platform-web` — адаптеры портов для браузера (OPFS, `fetch`).
 - `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
+- `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
 - `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
 - `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
   и `defineCoreContract` для тестов. Ни от чего не зависит.
@@ -68,6 +69,9 @@
     возможность ядра = метод в `Core` + сценарии в `contract/scenarios.json` + обе реализации (WASM и IPC) + тесты.
     Политика путей для недоверенных входов одна: `app_core::path::validate_relative`; CLI как доверенный её не применяет.
 
+12. Границы зависимостей (ADR-0015) заданы данными в `tools/boundaries/rules.json`. Меняя архитектуру, обновляйте правила
+    и проверяйте новое правило намеренным нарушением в настоящем манифесте (устаревшее правило падает, а не молчит).
+
 ## Команды
 
 ```sh
@@ -78,6 +82,7 @@ bun run update:bindings           # перегенерировать apps/native
 cargo fmt --all --check           # форматирование (CI это проверяет)
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
 bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid
+bun run boundaries                # границы зависимостей по реальным графам Rust и TS (ADR-0015; нужен Rust)
 bun run format                    # oxfmt + cargo fmt: исправляет форматирование
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
