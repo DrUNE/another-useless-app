@@ -16,7 +16,7 @@
 | Цель | Стек | Статус |
 |---|---|---|
 | CLI | Rust (`crates/cli`) | готово |
-| Web | Solid 2 + Tailwind + ядро в WASM | запланировано |
+| Web | Solid 2 + Tailwind + ядро в WASM | каркас готов, сервис пока заглушка |
 | Desktop | Tauri 2 | запланировано |
 | Mobile | Tauri 2 (Android, iOS) | запланировано |
 
@@ -33,6 +33,8 @@
 (trait в Rust, интерфейсы в TS). Реализации подставляются в точке входа каждого приложения.
 
 ```
+apps/
+  web/              # Vite + Solid 2 + Tailwind
 crates/
   core/             # домен, use-cases, порты Fs/Http. Без tokio/reqwest/std::fs
   platform-native/  # адаптеры портов: tokio::fs, reqwest (для CLI и Tauri)
@@ -70,13 +72,17 @@ bun install                  # установить JS-зависимости
 cargo test --workspace       # тесты Rust (ядро проверяется на фейках)
 bun run typecheck            # typecheck TS-пакетов
 
+bun run dev:web              # web: dev-сервер Vite
+bun run build:web            # web: продакшен-сборка в apps/web/dist
+
 # CLI: скачать URL и сохранить в файл
 cargo run -p app-cli -- fetch https://example.com /tmp/example.html
 cargo build -p app-cli --release   # бинарник: target/release/app
 ```
 
-Скрипты `dev:web`, `build:web`, `dev:native`, `build:native` в `package.json` уже заведены,
-но приложения `apps/web` и `apps/native` ещё не созданы.
+Скрипты `dev:native` и `build:native` уже заведены, но `apps/native` ещё не создан.
+
+Для изучения: [Solid 2 и Tailwind 4 для разработчика на React](docs/learning/solid-and-tailwind-for-react-developers.md).
 
 ## Дорожная карта и процесс
 

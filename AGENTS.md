@@ -27,7 +27,8 @@
 - `crates/cli` — консольное приложение (бинарник `app`).
 - `packages/platform` — TS-порты для web-стороны.
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
-- Планируются: `apps/web`, `apps/native` (Tauri 2, `src-tauri` добавить в `members` корневого `Cargo.toml`),
+- `apps/web` — Vite + Solid 2 + Tailwind. Пока работает с заглушкой сервиса (`src/service.ts`).
+- Планируются: `apps/native` (Tauri 2, `src-tauri` добавить в `members` корневого `Cargo.toml`),
   `crates/core-wasm`, `packages/ui`, `packages/app`, `packages/features/*`.
 
 ## Жёсткие правила архитектуры
@@ -49,18 +50,23 @@
 bun install
 cargo test --workspace            # Rust-тесты
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7)
+bun run dev:web                   # dev-сервер web (Vite)
+bun run build:web                 # продакшен-сборка web в apps/web/dist
 cargo run -p app-cli -- fetch <url> <path>
 ```
 
-Перед завершением задачи прогоните `cargo test --workspace` и `bun run typecheck`.
+Перед завершением задачи прогоните `cargo test --workspace` и `bun run typecheck`;
+если менялся web — ещё и `bun run build:web` (typecheck не ловит ошибки плагинов и Tailwind).
 Если что-то не удалось проверить (например, нет wasm-таргета), прямо скажите об этом.
 
 ## Стек и версии
 
 - bun workspaces; версии зависимостей закреплены в `catalog` корневого `package.json`.
   Добавляя пакет, используйте `"catalog:"`, а не отдельную версию.
-- Solid 2 пока в `next`-теге (`2.0.0-rc.x`, `vite-plugin-solid` `3.0.0-next.x`): API может меняться,
-  проверяйте поведение сборкой, а не памятью.
+- Solid 2 пока в RC (`solid-js` и `@solidjs/web` `2.0.0-rc.x`, плагин Vite — `@solidjs/vite-plugin`
+  `3.0.0-next.x`; `vite-plugin-solid` переименован и не используется). API отличается от Solid 1.x и от React:
+  сверяйтесь с `node_modules/solid-js/CHEATSHEET.md` и `docs/learning/`, а не с памятью и старыми туториалами.
+  В tsconfig `jsxImportSource` — `@solidjs/web`; DOM-API (`render` и др.) импортируются из `@solidjs/web`.
 - TypeScript 7: нативный компилятор запускается как `tsc` (не `tsgo`).
 - Tailwind 4 в CSS-first режиме; тема в `packages/config/theme.css`, источники классов через `@source`.
 - Rust edition 2024, resolver 3. Зависимости общих крейтов — через `[workspace.dependencies]`.
