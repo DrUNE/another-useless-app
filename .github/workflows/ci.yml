@@ -61,6 +61,8 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
+      # Границы зависимостей Rust и TS по реальным графам (ADR-0015). Здесь есть и Rust, и bun.
+      - run: bun run boundaries
       # Собирает WASM и проверяет TS-типы кода, который его использует (core-wasm и web).
       - run: bun run check:wasm
       # Тесты границы Rust↔JS: на bun, Node.js не нужен (ADR-0013).

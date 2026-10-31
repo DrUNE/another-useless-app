@@ -1,0 +1,94 @@
+{
+  "rust": [
+    {
+      "crate": "app-core",
+      "target": "host",
+      "directOnly": ["thiserror"],
+      "why": "ADR-0002: ядро без платформенных зависимостей, иначе оно не соберётся под wasm32"
+    },
+    {
+      "crate": "app-platform-native",
+      "target": "host",
+      "forbidTransitive": [
+        "tauri",
+        "wry",
+        "wasm-bindgen",
+        "wasm-bindgen-futures",
+        "js-sys",
+        "web-sys"
+      ],
+      "why": "ADR-0003: нативные адаптеры не знают ни про Tauri, ни про браузер"
+    },
+    {
+      "crate": "app-cli",
+      "target": "host",
+      "forbidTransitive": [
+        "tauri",
+        "wry",
+        "wasm-bindgen",
+        "wasm-bindgen-futures",
+        "js-sys",
+        "web-sys"
+      ],
+      "why": "ADR-0006: CLI не тянет ни Tauri, ни браузерные крейты"
+    },
+    {
+      "crate": "app-native",
+      "target": "host",
+      "forbidTransitive": ["wasm-bindgen", "wasm-bindgen-futures", "js-sys", "web-sys"],
+      "why": "ADR-0006: нативное приложение не содержит браузерной обвязки WASM"
+    },
+    {
+      "crate": "app-core-wasm",
+      "target": "wasm32-unknown-unknown",
+      "directOnly": ["app-core", "js-sys", "wasm-bindgen", "wasm-bindgen-futures"],
+      "forbidTransitive": ["tokio", "reqwest", "hyper", "tauri", "wry", "mio"],
+      "why": "ADR-0002 и ADR-0008: в WASM нет файловой системы и сокетов, ввод-вывод идёт через порты из JS"
+    }
+  ],
+  "ts": [
+    {
+      "package": "@app/core-api",
+      "directOnly": [],
+      "why": "ADR-0014: контракт ядра ни от чего не зависит"
+    },
+    {
+      "package": "@app/platform",
+      "directOnly": [],
+      "why": "ADR-0003: порты ни от чего не зависят"
+    },
+    {
+      "package": "@app/platform-web",
+      "directOnly": ["@app/platform"],
+      "why": "ADR-0008: адаптеры браузера реализуют только порты"
+    },
+    {
+      "package": "@app/core-wasm",
+      "directOnly": ["@app/core-api", "@app/platform"],
+      "why": "ADR-0008 и ADR-0014: мост WASM знает контракт и порты, больше ничего"
+    },
+    {
+      "package": "@app/app",
+      "directOnly": ["@app/core-api", "@solidjs/web", "solid-js"],
+      "forbidTransitive": [
+        "@tauri-apps/*",
+        "@app/core-wasm",
+        "@app/platform",
+        "@app/platform-web",
+        "@app/web",
+        "@app/native"
+      ],
+      "why": "ADR-0014: UI знает только контракт ядра и Solid"
+    },
+    {
+      "package": "@app/web",
+      "forbidTransitive": ["@tauri-apps/*", "@app/native"],
+      "why": "ADR-0006: web не тянет Tauri и другое приложение"
+    },
+    {
+      "package": "@app/native",
+      "forbidTransitive": ["@app/core-wasm", "@app/platform-web", "@app/web"],
+      "why": "ADR-0006: нативное приложение не везёт WASM и не зависит от web"
+    }
+  ]
+}

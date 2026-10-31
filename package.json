@@ -46,7 +46,8 @@
     "format:check": "oxfmt --check",
     "format:check:rust": "cargo fmt --all --check",
     "test": "bun run --filter '*' test",
-    "doctor": "bun tools/doctor/src/index.ts"
+    "doctor": "bun tools/doctor/src/index.ts",
+    "boundaries": "bun tools/boundaries/src/index.ts"
   },
   "devDependencies": {
     "eslint-plugin-solid": "0.18.1",
