@@ -51,7 +51,7 @@ web         →  core-wasm (+ TS-адаптеры OPFS/fetch)  →  core
 - Платформенный код подключает только точка входа приложения.
 - Бизнес-логика тестируется на фейках портов, без сети и диска.
 
-Подробности и компромиссы будут фиксироваться в `docs/adr/` (пока не создан).
+Решения и компромиссы зафиксированы в [`docs/adr/`](docs/adr/README.md).
 
 ## Требования
 
@@ -76,12 +76,8 @@ cargo build -p app-cli --release   # бинарник: target/release/app
 Скрипты `dev:web`, `build:web`, `dev:native`, `build:native` в `package.json` уже заведены,
 но приложения `apps/web` и `apps/native` ещё не созданы.
 
-## Дорожная карта
+## Дорожная карта и процесс
 
-1. ADR и документация решений
-2. `apps/web`: Solid 2 + Tailwind
-3. `core-wasm`: то же ядро в браузере (fs через OPFS, http через `fetch`)
-4. `apps/native`: Tauri 2 desktop, типизированный IPC, capabilities
-5. Единый TS-интерфейс сервиса для UI (WASM в вебе, IPC в Tauri)
-6. Проверка границ зависимостей и CI-матрица
-7. Mobile (Android, затем iOS)
+Актуальные планы — в закреплённом issue [Roadmap (#8)](https://github.com/DrUNE/another-useless-app/issues/8)
+и связанных задачах. Работа идёт так: issue → ветка → pull request (`Closes #N`) → squash-слияние.
+Подробности для людей и агентов — в [AGENTS.md](AGENTS.md).

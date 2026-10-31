@@ -1,0 +1,32 @@
+name: Task
+description: Задача из дорожной карты или улучшение
+labels: ["roadmap"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Цель
+      description: Что должно появиться или измениться и зачем.
+    validations:
+      required: true
+  - type: textarea
+    id: learning
+    attributes:
+      label: Чему учимся
+      description: Какая практика или концепт разбирается в этой задаче (проект учебный).
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии готовности
+      description: Проверяемые условия, когда задачу можно закрыть.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: deps
+    attributes:
+      label: Зависимости и ADR
+      description: От каких issue зависит; нужен ли новый ADR или какие существующие затрагиваются.
