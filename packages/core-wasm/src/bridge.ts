@@ -1,4 +1,5 @@
 import type { Fs, Http } from "@app/platform";
+
 import type { WasmFs, WasmHttp } from "../pkg/app_core_wasm.js";
 
 // TS-порты (packages/platform) богаче, чем порты Rust-ядра (crates/core/src/ports.rs).

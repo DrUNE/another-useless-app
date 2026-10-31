@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { Fs, Http } from "@app/platform";
+import { describe, expect, it } from "vitest";
+
 import { fsBridge, httpBridge } from "./bridge";
 
 function recordingFs() {
