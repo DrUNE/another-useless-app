@@ -70,7 +70,7 @@ bun run test:native               # Tauri-крейт: IPC, права, акту�
 bun run update:bindings           # перегенерировать apps/native/src/bindings.ts
 cargo fmt --all --check           # форматирование (CI это проверяет)
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
-bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid (нужен Node.js)
+bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid
 bun run format                    # oxfmt + cargo fmt: исправляет форматирование
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
