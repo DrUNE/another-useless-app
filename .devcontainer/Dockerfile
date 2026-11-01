@@ -14,8 +14,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* /tmp/debian.txt
 
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
-COPY --from=rustup /usr/local/rustup /usr/local/rustup
-COPY --from=rustup /usr/local/cargo /usr/local/cargo
+# Только rustup и его proxy-команды, без toolchain из образа rust: закреплённая версия ставится ниже один раз.
+COPY --from=rustup /usr/local/cargo/bin /usr/local/cargo/bin
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:${PATH}
@@ -24,8 +24,10 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 WORKDIR /tmp/toolchain
 COPY rust-toolchain.toml Cargo.lock ./
 RUN rustup toolchain install \
+ && rustup default "$(sed -n 's/^channel = "\(.*\)"/\1/p' rust-toolchain.toml)" \
  && cargo install wasm-bindgen-cli --locked \
       --version "$(sed -n '/^name = "wasm-bindgen"$/{n;s/version = "\(.*\)"/\1/p}' Cargo.lock)" \
+ && rm -rf /usr/local/cargo/registry/* \
  && chown -R vscode:vscode /usr/local/rustup /usr/local/cargo
 
 WORKDIR /
