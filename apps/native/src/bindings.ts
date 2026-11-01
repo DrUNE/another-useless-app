@@ -5,6 +5,7 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 /** Commands */
 export const commands = {
 	saveUrl: (url: string, path: string) => typedError<SaveReport, CommandError>(__TAURI_INVOKE("save_url", { url, path })),
+	readFile: (path: string) => typedError<number[], CommandError>(__TAURI_INVOKE("read_file", { path })),
 };
 
 /* Types */

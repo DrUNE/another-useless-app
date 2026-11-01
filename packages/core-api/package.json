@@ -5,7 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./contract": "./src/contract.ts",
-    "./scenarios.json": "./contract/scenarios.json"
+    "./scenarios.json": "./contract/scenarios.json",
+    "./read-scenarios.json": "./contract/read-scenarios.json"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

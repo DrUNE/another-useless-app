@@ -24,6 +24,8 @@ export interface Core {
    * При отказе отклоняется `CoreException`.
    */
   saveUrl(url: string, path: string): Promise<SaveReport>;
+  /** Прочитать файл как байты. Текстовую кодировку выбирает вызывающий код. */
+  readFile(path: string): Promise<Uint8Array>;
 }
 
 /** Единый вид отказа для всех реализаций: `Error` со стеком и типизированной причиной в `error`. */

@@ -1,9 +1,10 @@
 import { CoreException } from "@app/core-api";
-import { scenarios } from "@app/core-api/contract";
+import { readFileScenarios, scenarios } from "@app/core-api/contract";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const saveUrl = vi.hoisted(() => vi.fn());
-vi.mock("./bindings", () => ({ commands: { saveUrl } }));
+const readFile = vi.hoisted(() => vi.fn());
+vi.mock("./bindings", () => ({ commands: { saveUrl, readFile } }));
 
 const { createIpcCore } = await import("./core");
 
@@ -14,6 +15,7 @@ describe("createIpcCore", () => {
     // Фигурные скобки нужны: vitest вызывает значение, возвращённое из beforeEach, как функцию очистки,
     // а mockReset() возвращает сам мок.
     saveUrl.mockReset();
+    readFile.mockReset();
   });
 
   it("returns the report of a successful command", async () => {
@@ -47,5 +49,28 @@ describe("createIpcCore", () => {
     const failure = new Error("IPC is unavailable");
     saveUrl.mockRejectedValue(failure);
     await expect(createIpcCore().saveUrl("http://x", "a.txt")).rejects.toBe(failure);
+  });
+
+  it("returns file bytes as a Uint8Array", async () => {
+    readFile.mockResolvedValue({ status: "ok", data: [208, 191] });
+    const result = await createIpcCore().readFile("a.txt");
+    expect(result).toBeInstanceOf(Uint8Array);
+    expect(Array.from(result)).toEqual([208, 191]);
+    expect(readFile).toHaveBeenCalledWith("a.txt");
+  });
+
+  it("turns read errors into CoreException with the same cause", async () => {
+    for (const scenario of readFileScenarios.filter((s) => s.expect.error)) {
+      const error = { message: "details", ...scenario.expect.error };
+      readFile.mockResolvedValue({ status: "error", error });
+      const failure = await createIpcCore()
+        .readFile(scenario.path)
+        .then(
+          () => undefined,
+          (e: unknown) => e,
+        );
+      expect(failure, scenario.name).toBeInstanceOf(CoreException);
+      expect((failure as CoreException).error, scenario.name).toEqual(error);
+    }
   });
 });

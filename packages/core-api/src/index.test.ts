@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { scenarios } from "./contract";
+import { readFileScenarios, scenarios } from "./contract";
 import { type CoreError, CoreException, isCoreError } from "./index";
 
 describe("CoreException", () => {
@@ -43,17 +43,19 @@ describe("isCoreError", () => {
 });
 
 describe("contract scenarios", () => {
+  const all = [...scenarios, ...readFileScenarios];
+
   it("each scenario expects exactly one outcome and has a unique name", () => {
-    for (const scenario of scenarios) {
+    for (const scenario of all) {
       expect(Boolean(scenario.expect.ok) !== Boolean(scenario.expect.error), scenario.name).toBe(
         true,
       );
     }
-    expect(new Set(scenarios.map((s) => s.name)).size).toBe(scenarios.length);
+    expect(new Set(all.map((s) => s.name)).size).toBe(all.length);
   });
 
   it("every expected error has a valid kind", () => {
-    for (const scenario of scenarios.filter((s) => s.expect.error)) {
+    for (const scenario of all.filter((s) => s.expect.error)) {
       expect(["invalidPath", "io", "network", "status"]).toContain(scenario.expect.error?.["kind"]);
     }
   });
