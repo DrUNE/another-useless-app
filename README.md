@@ -131,3 +131,9 @@ cargo build -p app-cli --release   # бинарник: target/release/app
 Актуальные планы — в закреплённом issue [Roadmap (#8)](https://github.com/DrUNE/another-useless-app/issues/8)
 и связанных задачах. Работа идёт так: issue → ветка → pull request (`Closes #N`) → squash-слияние.
 Подробности для людей и агентов — в [AGENTS.md](AGENTS.md).
+
+## Лицензия
+
+- **Код** (`crates/`, `packages/`, `apps/`, `tools/`, `tests/`, этот README и AGENTS.md): [MIT](LICENSE), © 2026 Andrey Litvinov.
+- **Тексты в [`docs/`](docs/)** (ADR и конспекты): [CC BY 4.0](docs/LICENSE). Использование и изменение разрешены при указании авторства; фрагменты кода внутри этих текстов под MIT.
+- У зависимостей свои лицензии. Для Rust `bun run deny` следит, чтобы это были разрешительные лицензии и MPL-2.0. Поставляя собранные программы, сохраняйте уведомления зависимостей (пока не автоматизировано, см. [ADR-0019](docs/adr/0019-licenses.md)).
