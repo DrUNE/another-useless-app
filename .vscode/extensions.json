@@ -4,5 +4,6 @@
     "oxc.oxc-vscode",
     "bradlc.vscode-tailwindcss",
     "tauri-apps.tauri-vscode"
-  ]
+  ],
+  "unwantedRecommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
 }

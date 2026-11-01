@@ -16,7 +16,8 @@
     },
     "JavaScript": {
       "format_on_save": "on",
-      "formatter": [{ "language_server": { "name": "oxfmt" } }]
+      "formatter": [{ "language_server": { "name": "oxfmt" } }],
+      "language_servers": ["!eslint", "..."]
     },
     "JSON": {
       "format_on_save": "on",
@@ -32,11 +33,13 @@
     },
     "TypeScript": {
       "format_on_save": "on",
-      "formatter": [{ "language_server": { "name": "oxfmt" } }]
+      "formatter": [{ "language_server": { "name": "oxfmt" } }],
+      "language_servers": ["!eslint", "..."]
     },
     "TSX": {
       "format_on_save": "on",
-      "formatter": [{ "language_server": { "name": "oxfmt" } }]
+      "formatter": [{ "language_server": { "name": "oxfmt" } }],
+      "language_servers": ["!eslint", "..."]
     }
   }
 }
