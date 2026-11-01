@@ -1,6 +1,7 @@
 {
   "name": "another-useless-app",
   "private": true,
+  "license": "MIT",
   "workspaces": {
     "packages": [
       "apps/*",

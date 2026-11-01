@@ -6,6 +6,7 @@ members = ["crates/*", "apps/native/src-tauri"]
 version = "0.1.0"
 edition = "2024"
 publish = false
+license = "MIT"
 
 [workspace.dependencies]
 app-core = { path = "crates/core" }

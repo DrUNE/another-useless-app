@@ -3,6 +3,7 @@ name = "app-native"
 version.workspace = true
 edition.workspace = true
 publish.workspace = true
+license.workspace = true
 
 [lib]
 name = "app_native_lib"

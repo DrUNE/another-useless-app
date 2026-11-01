@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -48,5 +49,32 @@ describe("version pins agree across the repository", () => {
       .filter((line) => line.includes('{ id = "RUSTSEC-'));
     expect(exceptions.length).toBeGreaterThan(0);
     for (const line of exceptions) expect(line, line).toMatch(/reason = ".{20,}"/);
+  });
+  it("the licenses are in place and every manifest declares them", () => {
+    const mit = read("LICENSE");
+    expect(mit).toMatch(/^MIT License\n/);
+    expect(mit).toContain("Copyright (c) 2026 Andrey Litvinov");
+    expect(mit).toContain("Permission is hereby granted, free of charge");
+
+    // Официальный текст CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode.txt) лежит в docs/LICENSE без изменений:
+    // меняется только пояснение сверху. Контрольная сумма закреплена, чтобы случайная правка текста лицензии не прошла.
+    const docs = read("docs/LICENSE");
+    expect(docs).toContain("Creative Commons Attribution 4.0 International (CC BY 4.0)");
+    const official = docs.slice(docs.indexOf("Attribution 4.0 International\n\n====="));
+    expect(createHash("sha256").update(official).digest("hex")).toBe(
+      "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
+    );
+
+    expect(read("Cargo.toml")).toMatch(/^license = "MIT"$/m);
+    expect(JSON.parse(read("package.json")).license).toBe("MIT");
+    const crates = [
+      "crates/core",
+      "crates/platform-native",
+      "crates/cli",
+      "crates/core-wasm",
+      "apps/native/src-tauri",
+    ];
+    for (const crate of crates)
+      expect(read(`${crate}/Cargo.toml`), crate).toContain("license.workspace = true");
   });
 });
