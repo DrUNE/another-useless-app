@@ -19,6 +19,16 @@ describe("version pins agree across the repository", () => {
     expect(devcontainer.build.args.BUN_VERSION).toBe(packageManagerVersion(read("package.json")));
   });
 
+  it("devcontainer and workspace recommend the same VS Code extensions", () => {
+    const devcontainer = JSON.parse(read(".devcontainer/devcontainer.json")) as {
+      customizations: { vscode: { extensions: string[] } };
+    };
+    const workspace = JSON.parse(read(".vscode/extensions.json")) as { recommendations: string[] };
+    expect(devcontainer.customizations.vscode.extensions.toSorted()).toEqual(
+      workspace.recommendations.toSorted(),
+    );
+  });
+
   it("Rust is pinned to an exact version, not a floating channel", () => {
     expect(toolchainChannel(read("rust-toolchain.toml"))).toMatch(/^\d+\.\d+\.\d+$/);
   });

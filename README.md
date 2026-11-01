@@ -94,6 +94,15 @@ bun run doctor             # что ещё не хватает; подскаже
 [prerequisites Tauri](https://v2.tauri.app/start/prerequisites/). CLI, WASM и web эти пакеты не требуют.
 Для mobile (позже): Android SDK/NDK; iOS возможен только на macOS.
 
+### Редакторы
+
+В репозитории есть workspace-настройки для **VS Code** (`.vscode/`) и **Zed** (`.zed/`). После `bun install`
+оба редактора используют локальные Oxlint и Oxfmt: диагностика — по общему `.oxlintrc.json`, форматирование — при
+сохранении. Rust форматируется через `rust-analyzer`.
+
+VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS и Tauri; в devcontainer они уже установлены.
+Zed автоматически установит Oxc, HTML, TOML и Dockerfile; Rust и TypeScript поддерживаются нативно.
+
 ## Команды
 
 ```sh

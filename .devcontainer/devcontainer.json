@@ -20,12 +20,7 @@
         "oxc.oxc-vscode",
         "bradlc.vscode-tailwindcss",
         "tauri-apps.tauri-vscode"
-      ],
-      "settings": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "oxc.oxc-vscode",
-        "[rust]": { "editor.defaultFormatter": "rust-lang.rust-analyzer" }
-      }
+      ]
     }
   }
 }
