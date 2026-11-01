@@ -4,6 +4,7 @@
   // Правила Solid (реактивность, привычки из React). Плагин написан под Solid 1.x: правило `solid/imports`
   // не включаем (оно переписывало бы импорты под 1.x), остальные проверены на коде Solid 2.
   "jsPlugins": ["eslint-plugin-solid"],
+  "options": { "typeAware": true },
   "categories": { "correctness": "error" },
   "env": { "es2023": true },
   "ignorePatterns": ["**/dist", "packages/core-wasm/pkg", "apps/native/src/bindings.ts"],
