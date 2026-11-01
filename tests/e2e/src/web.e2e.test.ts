@@ -156,6 +156,16 @@ describe.runIf(browserPath !== undefined || required)("web app in a real browser
       expect(await opfsText(page, "downloads", "hello.txt")).toBe("hello opfs\n");
     }));
 
+  it("reads a saved file through the shared core", () =>
+    inFreshPage(async (page) => {
+      await submit(page, `${app.url}/hello.txt`, "downloads/hello.txt");
+      await page.waitForSelector("section li button");
+      await page.click("section li button");
+      await page.waitForSelector("pre");
+      expect(await page.textContent("pre")).toBe("hello opfs\n");
+      expect(await page.textContent("section h3")).toBe("Содержимое: downloads/hello.txt");
+    }));
+
   it("keeps the file after a reload", () =>
     inFreshPage(async (page) => {
       await submit(page, `${app.url}/hello.txt`, "downloads/hello.txt");

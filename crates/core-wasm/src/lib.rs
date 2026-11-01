@@ -6,6 +6,7 @@
 use app_core::fetcher::{self, FetchError};
 use app_core::path::{InvalidPath, validate_relative};
 use app_core::ports::{Fs, Http, HttpResponse, PortError};
+use app_core::reader::{self, ReadFileError};
 use js_sys::{Object, Reflect, Uint8Array};
 use wasm_bindgen::prelude::*;
 
@@ -150,4 +151,27 @@ pub async fn save_url(
             bytes: r.bytes,
         })
         .map_err(to_js_error)
+}
+
+fn to_js_read_error(error: ReadFileError) -> JsValue {
+    match error {
+        ReadFileError::InvalidPath(InvalidPath(path)) => {
+            error_object("invalidPath", "path", path.into())
+        }
+        ReadFileError::Port(PortError::Io(message)) => {
+            error_object("io", "message", message.into())
+        }
+        ReadFileError::Port(PortError::Network(message)) => {
+            error_object("network", "message", message.into())
+        }
+    }
+}
+
+/// Прочитать `path` через переданный JS-порт. Путь недоверенный, как и при записи.
+#[wasm_bindgen(js_name = readFile)]
+pub async fn read_file(fs: JsFs, path: String) -> Result<Vec<u8>, JsValue> {
+    validate_relative(&path).map_err(|e| to_js_read_error(e.into()))?;
+    reader::read_file(&fs, &path)
+        .await
+        .map_err(to_js_read_error)
 }

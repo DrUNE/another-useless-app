@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import readScenarioData from "../contract/read-scenarios.json" with { type: "json" };
 import scenarioData from "../contract/scenarios.json" with { type: "json" };
 import { type Core, CoreException } from "./index";
 
@@ -22,6 +23,7 @@ export interface ContractScenario {
 }
 
 export const scenarios = scenarioData as ContractScenario[];
+export const readFileScenarios = readScenarioData as ReadFileContractScenario[];
 
 export interface Harness {
   core: Core;
@@ -61,6 +63,54 @@ export function defineCoreContract(name: string, target: ContractTarget): void {
           if (scenario.expect.httpContacted !== undefined) {
             expect(seen.httpContacted).toBe(scenario.expect.httpContacted);
           }
+        }
+      });
+    }
+  });
+}
+
+export interface ReadFileContractScenario {
+  name: string;
+  path: string;
+  file: { body: string } | { readFails: true };
+  expect: {
+    ok?: { bytes: number[] };
+    error?: Record<string, unknown>;
+    readAttempted?: boolean;
+  };
+}
+
+export interface ReadFileHarness {
+  core: Core;
+  observe?(): { readAttempted: boolean };
+}
+
+export interface ReadFileContractTarget {
+  arrange(scenario: ReadFileContractScenario): Promise<ReadFileHarness> | ReadFileHarness;
+}
+
+export function defineReadFileContract(name: string, target: ReadFileContractTarget): void {
+  describe(`Core readFile contract: ${name}`, () => {
+    for (const scenario of readFileScenarios) {
+      it(scenario.name, async () => {
+        const harness = await target.arrange(scenario);
+        const outcome = await harness.core.readFile(scenario.path).then(
+          (report) => ({ report }),
+          (error: unknown) => ({ error }),
+        );
+
+        if (scenario.expect.ok !== undefined) {
+          expect("report" in outcome ? Array.from(outcome.report) : undefined).toEqual(
+            scenario.expect.ok.bytes,
+          );
+        } else {
+          expect("error" in outcome ? outcome.error : undefined).toBeInstanceOf(CoreException);
+          const exception = (outcome as { error: CoreException }).error;
+          expect(exception.error).toMatchObject(scenario.expect.error ?? {});
+        }
+
+        if (scenario.expect.readAttempted !== undefined) {
+          expect(harness.observe?.().readAttempted).toBe(scenario.expect.readAttempted);
         }
       });
     }

@@ -1,7 +1,12 @@
 import { type Core, CoreException, isCoreError } from "@app/core-api";
 import { type Platform, requirePort } from "@app/platform";
 
-import init, { initSync, saveUrl, type SyncInitInput } from "../pkg/app_core_wasm.js";
+import init, {
+  initSync,
+  readFile as wasmReadFile,
+  saveUrl,
+  type SyncInitInput,
+} from "../pkg/app_core_wasm.js";
 import { fsBridge, httpBridge } from "./bridge";
 
 export interface CreateCoreOptions {
@@ -41,6 +46,13 @@ export async function createCore(
         }
       } catch (error) {
         // Rust отклоняет промис объектом WasmError; всё остальное (паника, сбой загрузки) пробрасываем как есть.
+        throw isCoreError(error) ? new CoreException(error) : error;
+      }
+    },
+    async readFile(path) {
+      try {
+        return await wasmReadFile(fs, path);
+      } catch (error) {
         throw isCoreError(error) ? new CoreException(error) : error;
       }
     },

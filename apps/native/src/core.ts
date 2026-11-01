@@ -14,5 +14,10 @@ export function createIpcCore(): Core {
       if (result.status === "error") throw new CoreException(toCoreError(result.error));
       return result.data;
     },
+    async readFile(path) {
+      const result = await commands.readFile(path);
+      if (result.status === "error") throw new CoreException(toCoreError(result.error));
+      return new Uint8Array(result.data);
+    },
   };
 }

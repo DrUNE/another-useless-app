@@ -2,7 +2,7 @@ fn main() {
     // Объявляем свои команды в манифесте приложения: тогда каждая требует явного разрешения
     // в capabilities (`allow-<имя>`), а не доступна интерфейсу по умолчанию.
     let attributes = tauri_build::Attributes::new()
-        .app_manifest(tauri_build::AppManifest::new().commands(&["save_url"]));
+        .app_manifest(tauri_build::AppManifest::new().commands(&["save_url", "read_file"]));
 
     // На Windows манифест встраиваем сами (см. ниже), поэтому у tauri-build он отключён: иначе в бинарнике оказались бы два.
     #[cfg(windows)]

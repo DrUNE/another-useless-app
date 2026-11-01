@@ -9,7 +9,7 @@ use tauri_specta::{Builder, collect_commands};
 
 /// Единый список команд: из него строятся и обработчик IPC, и TS-типы (ADR-0009).
 pub fn specta_builder<R: tauri::Runtime>() -> Builder<R> {
-    Builder::<R>::new().commands(collect_commands![commands::save_url])
+    Builder::<R>::new().commands(collect_commands![commands::save_url, commands::read_file])
 }
 
 /// Контекст приложения из `tauri.conf.json` и capabilities. Макрос раскрывается здесь **один раз** на крейт: на macOS он
@@ -98,6 +98,7 @@ mod tests {
 
     fn invoke(
         sandbox: PathBuf,
+        command: &str,
         args: serde_json::Value,
     ) -> Result<tauri::ipc::InvokeResponseBody, serde_json::Value> {
         let app = mock_builder()
@@ -111,7 +112,7 @@ mod tests {
         get_ipc_response(
             &webview,
             InvokeRequest {
-                cmd: "save_url".into(),
+                cmd: command.into(),
                 callback: CallbackFn(0),
                 error: CallbackFn(1),
                 // Адрес источника запроса зависит от ОС (так в документации tauri::test).
@@ -142,6 +143,7 @@ mod tests {
         let url = serve_once(200, "hello");
         let res = invoke(
             dir.clone(),
+            "save_url",
             json!({ "url": url, "path": "downloads/a.txt" }),
         );
 
@@ -193,7 +195,7 @@ mod tests {
                 std::fs::create_dir_all(dir.join(path)).unwrap();
             }
 
-            let result = invoke(dir.clone(), json!({ "url": url, "path": path }));
+            let result = invoke(dir.clone(), "save_url", json!({ "url": url, "path": path }));
             let expect = &scenario["expect"];
             match (&expect["ok"], &expect["error"]) {
                 (ok, _) if !ok.is_null() => {
@@ -216,6 +218,50 @@ mod tests {
                     !dir.join(path).exists(),
                     "{name}: the path escaped the sandbox"
                 );
+            }
+            std::fs::remove_dir_all(dir).ok();
+        }
+    }
+
+    #[test]
+    fn ipc_read_file_follows_the_shared_core_contract() {
+        const SCENARIOS: &str =
+            include_str!("../../../../packages/core-api/contract/read-scenarios.json");
+        let scenarios: Vec<serde_json::Value> = serde_json::from_str(SCENARIOS).unwrap();
+        assert!(!scenarios.is_empty());
+
+        for (index, scenario) in scenarios.iter().enumerate() {
+            let name = scenario["name"].as_str().unwrap();
+            let path = scenario["path"].as_str().unwrap();
+            let dir = sandbox(&format!("read-contract-{index}"));
+            let target = dir.join(path);
+
+            if scenario["expect"]["readAttempted"] != false {
+                if let Some(body) = scenario["file"]["body"].as_str() {
+                    if let Some(parent) = target.parent() {
+                        std::fs::create_dir_all(parent).unwrap();
+                    }
+                    std::fs::write(&target, body).unwrap();
+                }
+                if scenario["file"]["readFails"] == true {
+                    std::fs::create_dir_all(&target).unwrap();
+                }
+            }
+
+            let result = invoke(dir.clone(), "read_file", json!({ "path": path }));
+            let expect = &scenario["expect"];
+            match (&expect["ok"], &expect["error"]) {
+                (ok, _) if !ok.is_null() => {
+                    let bytes: serde_json::Value = result.expect(name).deserialize().unwrap();
+                    assert_eq!(&bytes, &ok["bytes"], "{name}");
+                }
+                (_, error) => {
+                    let actual = result.expect_err(name);
+                    assert!(
+                        is_partial_match(&actual, error),
+                        "{name}: expected {error}, got {actual}"
+                    );
+                }
             }
             std::fs::remove_dir_all(dir).ok();
         }

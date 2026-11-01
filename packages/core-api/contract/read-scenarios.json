@@ -1,0 +1,32 @@
+[
+  {
+    "name": "reads a file as bytes",
+    "path": "a/b.txt",
+    "file": { "body": "hi" },
+    "expect": { "ok": { "bytes": [104, 105] }, "readAttempted": true }
+  },
+  {
+    "name": "preserves UTF-8 bytes",
+    "path": "greeting.txt",
+    "file": { "body": "привет" },
+    "expect": {
+      "ok": { "bytes": [208, 191, 209, 128, 208, 184, 208, 178, 208, 181, 209, 130] },
+      "readAttempted": true
+    }
+  },
+  {
+    "name": "reports a failed read as an io error",
+    "path": "missing.txt",
+    "file": { "readFails": true },
+    "expect": { "error": { "kind": "io" }, "readAttempted": true }
+  },
+  {
+    "name": "rejects an untrusted path before reading",
+    "path": "../escape.txt",
+    "file": { "body": "x" },
+    "expect": {
+      "error": { "kind": "invalidPath", "path": "../escape.txt" },
+      "readAttempted": false
+    }
+  }
+]

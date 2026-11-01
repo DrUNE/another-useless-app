@@ -1,11 +1,12 @@
-//! IPC-команды: тонкая обёртка над use-cases ядра. Логики здесь нет, кроме политики путей,
-//! которая зависит от платформы и поэтому не может жить в `app-core`.
+//! IPC-команды: тонкие обёртки над use-cases ядра. Здесь только привязка
+//! проверенных относительных путей к корню данных, который выбирает платформа.
 
 use std::path::{Path, PathBuf};
 
 use app_core::fetcher::{self, FetchError};
 use app_core::path::{InvalidPath, validate_relative};
 use app_core::ports::PortError;
+use app_core::reader::{self, ReadFileError};
 use app_platform_native::{NativeFs, NativeHttp};
 use serde::Serialize;
 use specta::Type;
@@ -60,6 +61,16 @@ impl From<FetchError> for CommandError {
     }
 }
 
+impl From<ReadFileError> for CommandError {
+    fn from(e: ReadFileError) -> Self {
+        match e {
+            ReadFileError::InvalidPath(InvalidPath(path)) => Self::InvalidPath { path },
+            ReadFileError::Port(PortError::Io(message)) => Self::Io { message },
+            ReadFileError::Port(PortError::Network(message)) => Self::Network { message },
+        }
+    }
+}
+
 /// Путь из интерфейса считается недоверенным: правило допустимости общее для всех платформ и лежит в
 /// ядре (`app_core::path`), а здесь он только привязывается к каталогу данных приложения.
 /// Символические ссылки внутри `root` не проверяются.
@@ -85,6 +96,16 @@ pub async fn save_url(
         // Порт возвращает usize; u32 нужен для TS-типа number (specta не выводит u64/usize без BigInt).
         bytes: u32::try_from(report.bytes).unwrap_or(u32::MAX),
     })
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn read_file(state: State<'_, AppState>, path: String) -> Result<Vec<u8>, CommandError> {
+    let target = resolve(&state.root, &path)?;
+    let target = target
+        .to_str()
+        .ok_or_else(|| CommandError::InvalidPath { path: path.clone() })?;
+    Ok(reader::read_file(&state.fs, target).await?)
 }
 
 #[cfg(test)]
