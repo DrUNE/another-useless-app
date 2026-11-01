@@ -11,7 +11,7 @@
 | [0004](0004-ports-futures-not-send.md) | Futures в портах без требования `Send` | принято |
 | [0005](0005-bun-workspaces-with-catalog.md) | bun workspaces с `catalog`, без Turborepo | принято |
 | [0006](0006-independent-builds.md) | Независимые сборки для каждой цели | принято |
-| [0007](0007-protect-main-squash-only.md) | Защита `main` и слияние только через squash | принято |
+| [0007](0007-protect-main-squash-only.md) | Защита `main` и слияние только через squash | принято (список проверок заменён 0017) |
 | [0008](0008-wasm-boundary.md) | Граница WASM: порты реализуются в JS, артефакты не коммитятся | принято (тесты моста заменены 0013) |
 | [0009](0009-typed-ipc-tauri-specta.md) | Типизированный IPC через tauri-specta | принято |
 | [0010](0010-native-app-isolation-and-trust.md) | Нативное приложение: изоляция сборки и модель доверия | принято |
@@ -21,3 +21,4 @@
 | [0014](0014-ui-core-boundary.md) | Граница UI и ядра: единый интерфейс Core, типизированные ошибки и контракт как данные | принято |
 | [0015](0015-dependency-boundaries-as-data.md) | Проверка объявленных зависимостей: правила как данные | принято |
 | [0016](0016-web-e2e-in-a-real-browser.md) | Сквозные тесты веба в настоящем браузере | принято |
+| [0017](0017-os-matrix-gate-and-path-selection.md) | CI: матрица ОС, один итоговый check и выбор jobs по путям | принято |

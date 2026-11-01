@@ -15,10 +15,37 @@ permissions:
   contents: read
 
 jobs:
-  # Rust и TS проверяются независимо (ADR-0006): job rust не ставит bun, job ts не ставит Rust.
-  rust:
-    name: rust (cargo test)
+  # Решает, какие jobs нужны для изменённых файлов (ADR-0017). Вне pull request запускается всё.
+  changes:
+    name: changes
     runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.select.outputs.rust }}
+      ts: ${{ steps.select.outputs.ts }}
+      wasm: ${{ steps.select.outputs.wasm }}
+      native: ${{ steps.select.outputs.native }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Для pull request checkout даёт merge-коммит; двух коммитов достаточно, чтобы увидеть, что приносит PR.
+          fetch-depth: 2
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - id: select
+        run: bun tools/ci/src/index.ts >> "$GITHUB_OUTPUT"
+
+  # Rust и TS проверяются независимо (ADR-0006): job rust не ставит bun, job ts не ставит Rust.
+  # Матрица ОС (ADR-0017): у ubuntu прежние имена, у остальных ОС суффикс.
+  rust:
+    name: ${{ matrix.os == 'ubuntu-latest' && 'rust (cargo test)' || format('rust (cargo test) [{0}]', matrix.os) }}
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - run: rustup toolchain install
@@ -28,8 +55,14 @@ jobs:
       - run: cargo test --workspace --exclude app-native --locked
 
   ts:
-    name: ts (typecheck)
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os == 'ubuntu-latest' && 'ts (typecheck)' || format('ts (typecheck) [{0}]', matrix.os) }}
+    needs: changes
+    if: needs.changes.outputs.ts == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -41,9 +74,11 @@ jobs:
       - run: bun run format:check
       - run: bun run test
 
-  # Web зависит от WASM-сборки ядра (ADR-0008), поэтому ей нужны оба тулчейна.
+  # Web зависит от WASM-сборки ядра (ADR-0008), поэтому ей нужны оба тулчейна. Только Linux: нужны wasm-bindgen-cli и Chrome.
   wasm:
     name: wasm (build and test)
+    needs: changes
+    if: needs.changes.outputs.wasm == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -74,14 +109,21 @@ jobs:
         env:
           E2E_REQUIRE_BROWSER: "1"
 
-  # Десктоп: Tauri требует системных библиотек, поэтому живёт в своём job (ADR-0010).
+  # Десктоп: Tauri требует системных библиотек на Linux (ADR-0010); на macOS и Windows отдельных пакетов не нужно.
   native:
-    name: native (desktop build)
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os == 'ubuntu-latest' && 'native (desktop build)' || format('native (desktop build) [{0}]', matrix.os) }}
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       # Список пакетов один на CI, devcontainer и подсказки `bun run doctor`.
-      - run: |
+      - if: runner.os == 'Linux'
+        run: |
           sudo apt-get update
           xargs -a tools/system-deps/debian.txt sudo apt-get install -y --no-install-recommends
       - run: rustup toolchain install
@@ -94,3 +136,19 @@ jobs:
       - run: cargo test -p app-native --locked
       # Полная сборка без упаковки: проверяет связку Vite, Tauri CLI и Rust.
       - run: bun run build:native -- --no-bundle
+
+  # Единственная обязательная проверка (ADR-0017). Пропущенные по путям jobs считаются успехом, упавшие или отменённые ломают PR.
+  # Благодаря ей добавление ОС в матрицу или jobs не требует правки защиты ветки.
+  ci:
+    name: ci
+    if: always()
+    needs: [changes, rust, ts, wasm, native]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          case " $RESULTS " in
+            *" failure "*|*" cancelled "*) echo "есть упавшие или отменённые jobs"; exit 1 ;;
+          esac
