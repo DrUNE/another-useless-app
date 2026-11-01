@@ -32,6 +32,7 @@
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
 - `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
 - `tools/ci` — выбор jobs CI по изменённым файлам (функция `select` с тестами), ADR-0017.
+- `deny.toml` — политика зависимостей Rust для `cargo-deny`; `.github/workflows/audit.yml` — еженедельная проверка уязвимостей.
 - `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
 - `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
   и `defineCoreContract` для тестов. Ни от чего не зависит.
@@ -73,6 +74,9 @@
 12. Границы зависимостей (ADR-0015) заданы данными в `tools/boundaries/rules.json`. Меняя архитектуру, обновляйте правила
     и проверяйте новое правило намеренным нарушением в настоящем манифесте (устаревшее правило падает, а не молчит).
 
+13. Зависимости Rust (ADR-0018): после любого изменения `Cargo.toml` и `Cargo.lock` запускайте `bun run deny`. Исключения в `deny.toml`
+    допустимы только с причиной (тест это проверяет); не добавляйте `openssl` и `native-tls` (TLS только `rustls`) и пакеты не с crates.io.
+
 ## Команды
 
 ```sh
@@ -84,6 +88,7 @@ cargo fmt --all --check           # форматирование (CI это пр
 bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
 bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid
 bun run boundaries                # границы зависимостей по реальным графам Rust и TS (ADR-0015; нужен Rust)
+bun run deny                      # зависимости Rust: уязвимости, лицензии, запреты, источники (ADR-0018; нужен cargo-deny)
 bun run format                    # oxfmt + cargo fmt: исправляет форматирование
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)

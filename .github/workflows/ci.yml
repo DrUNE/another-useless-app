@@ -24,6 +24,7 @@ jobs:
       ts: ${{ steps.select.outputs.ts }}
       wasm: ${{ steps.select.outputs.wasm }}
       native: ${{ steps.select.outputs.native }}
+      deny: ${{ steps.select.outputs.deny }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -137,12 +138,28 @@ jobs:
       # Полная сборка без упаковки: проверяет связку Vite, Tauri CLI и Rust.
       - run: bun run build:native -- --no-bundle
 
+  # Зависимости Rust: уязвимости, лицензии, запретные крейты и источники (ADR-0018). Нужны только манифесты и lock-файл,
+  # поэтому job идёт только Linux и только когда они (или настройки) изменились. Новые уязвимости ловит расписание: audit.yml.
+  deny:
+    name: deny (cargo-deny)
+    needs: changes
+    if: needs.changes.outputs.deny == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny@0.20.2
+      - run: cargo deny --locked check
+
   # Единственная обязательная проверка (ADR-0017). Пропущенные по путям jobs считаются успехом, упавшие или отменённые ломают PR.
   # Благодаря ей добавление ОС в матрицу или jobs не требует правки защиты ветки.
   ci:
     name: ci
     if: always()
-    needs: [changes, rust, ts, wasm, native]
+    needs: [changes, rust, ts, wasm, native, deny]
     runs-on: ubuntu-latest
     steps:
       - env:

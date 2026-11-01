@@ -15,6 +15,26 @@ describe("select", () => {
     );
   });
 
+  it("runs the dependency audit only when manifests, the lock file, its config or CI change", () => {
+    const touching = [
+      "Cargo.lock",
+      "Cargo.toml",
+      "crates/core/Cargo.toml",
+      "apps/native/src-tauri/Cargo.toml",
+      "deny.toml",
+      ".github/workflows/ci.yml",
+    ];
+    for (const file of touching) expect(ran([file]), file).toContain("deny");
+    for (const file of [
+      "crates/core/src/path.rs",
+      "apps/web/src/index.tsx",
+      "package.json",
+      "README.md",
+    ]) {
+      expect(ran([file]), file).not.toContain("deny");
+    }
+  });
+
   it("skips the TS job for a Rust-only change but keeps everything that builds Rust", () => {
     expect(ran(["crates/core/src/path.rs"])).toEqual(["native", "rust", "wasm"]);
   });
@@ -39,7 +59,7 @@ describe("select", () => {
       const jobs = ran([file]);
       expect(jobs.length, file).toBeGreaterThanOrEqual(3);
     }
-    expect(ran([".github/workflows/ci.yml"])).toEqual(["native", "rust", "ts", "wasm"]);
+    expect(ran([".github/workflows/ci.yml"])).toEqual(["deny", "native", "rust", "ts", "wasm"]);
   });
 
   it("treats a file nobody listed as relevant to every job: a gap in the lists must not skip a check", () => {
@@ -51,6 +71,6 @@ describe("select", () => {
   });
 
   it("does not know what changed for an empty list, so it runs everything", () => {
-    expect(ran([])).toEqual(["native", "rust", "ts", "wasm"]);
+    expect(ran([])).toEqual(["deny", "native", "rust", "ts", "wasm"]);
   });
 });

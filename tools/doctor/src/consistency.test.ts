@@ -36,4 +36,17 @@ describe("version pins agree across the repository", () => {
       "libwebkit2gtk-4.1-dev",
     );
   });
+  it("both workflows run the same cargo-deny", () => {
+    const pinned = (file: string) => /cargo-deny@([\d.]+)/.exec(read(file))?.[1];
+    expect(pinned(".github/workflows/ci.yml")).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(pinned(".github/workflows/audit.yml")).toBe(pinned(".github/workflows/ci.yml"));
+  });
+
+  it("every advisory exception in deny.toml states a reason", () => {
+    const exceptions = read("deny.toml")
+      .split("\n")
+      .filter((line) => line.includes('{ id = "RUSTSEC-'));
+    expect(exceptions.length).toBeGreaterThan(0);
+    for (const line of exceptions) expect(line, line).toMatch(/reason = ".{20,}"/);
+  });
 });

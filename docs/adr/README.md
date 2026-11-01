@@ -22,3 +22,4 @@
 | [0015](0015-dependency-boundaries-as-data.md) | Проверка объявленных зависимостей: правила как данные | принято |
 | [0016](0016-web-e2e-in-a-real-browser.md) | Сквозные тесты веба в настоящем браузере | принято |
 | [0017](0017-os-matrix-gate-and-path-selection.md) | CI: матрица ОС, один итоговый check и выбор jobs по путям | принято |
+| [0018](0018-dependency-supply-chain-checks.md) | Проверка цепочки поставок зависимостей: cargo-deny | принято |
