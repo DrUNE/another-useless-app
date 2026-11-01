@@ -1,0 +1,67 @@
+# Проверка зависимостей Rust: уязвимости, лицензии, источники, запретные крейты (ADR-0018).
+# Запуск: `bun run deny` (нужен cargo-deny) или `cargo deny --locked check`.
+
+[graph]
+# Платформы, которые мы действительно собираем. Крейты, нужные только остальным (Android, Redox, WASI и т.п.), в проверку
+# не попадают. Вернём мобильные цели (#7): добавьте сюда их тройки.
+targets = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-apple-darwin",
+  "x86_64-pc-windows-msvc",
+  "wasm32-unknown-unknown",
+]
+
+[advisories]
+# Каждое исключение обязано иметь причину: «не знаю, почему падает» не причина. Пересматривайте при обновлении Tauri и specta.
+ignore = [
+  { id = "RUSTSEC-2024-0436", reason = "paste не поддерживается, это не уязвимость. Процедурный макрос времени компиляции из specta/tauri-specta, в бинарник не попадает; безопасного обновления нет." },
+  { id = "RUSTSEC-2024-0370", reason = "proc-macro-error не поддерживается, это не уязвимость. Процедурный макрос времени компиляции из GTK3-обвязки (glib-macros), которую Tauri использует на Linux; уйдёт вместе с переходом Tauri на GTK4." },
+]
+# Снятый с публикации (yanked) релиз отозван автором не зря.
+yanked = "deny"
+
+[licenses]
+# Разрешены разрешительные лицензии и MPL-2.0 (слабый копилефт на уровне файлов: достаточно не менять чужие файлы и сохранить
+# их исходный текст; зависимости Tauri, например cssparser, именно такие). Сильный копилефт (GPL, AGPL, LGPL) не разрешён:
+# двойные лицензии вида `MIT OR Apache-2.0 OR LGPL-2.1-or-later` (r-efi) проходят по разрешённой альтернативе.
+allow = [
+  "MIT",
+  "MIT-0",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Zlib",
+  "Unicode-3.0",
+  "Unlicense",
+  "0BSD",
+  "CC0-1.0",
+  "BSL-1.0",
+  "CDLA-Permissive-2.0",
+  "MPL-2.0",
+]
+confidence-threshold = 0.8
+
+[licenses.private]
+# Наши крейты (`publish = false`) не публикуются и лицензии не заявляют.
+ignore = true
+
+[bans]
+# Дубликаты версий неизбежны в большом графе (windows-sys и др.): сообщаем, но не падаем.
+multiple-versions = "warn"
+# Версия `*` в зависимости с crates.io запрещена; путь к нашим крейтам версии не имеет.
+wildcards = "deny"
+allow-wildcard-paths = true
+deny = [
+  { crate = "openssl", reason = "TLS только через rustls: системный OpenSSL ломает воспроизводимую сборку на Windows и macOS." },
+  { crate = "openssl-sys", reason = "см. openssl" },
+  { crate = "native-tls", reason = "см. openssl" },
+]
+
+[sources]
+# Пакеты только с crates.io: чужой реестр или git-зависимость обходят проверку advisories и лицензий.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

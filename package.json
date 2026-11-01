@@ -50,7 +50,8 @@
     "test": "bun run --filter '*' test",
     "doctor": "bun tools/doctor/src/index.ts",
     "boundaries": "bun tools/boundaries/src/index.ts",
-    "test:e2e": "bun run build:web && bun run --filter @app/e2e test:e2e"
+    "test:e2e": "bun run build:web && bun run --filter @app/e2e test:e2e",
+    "deny": "cargo deny --locked check"
   },
   "devDependencies": {
     "eslint-plugin-solid": "0.18.1",

@@ -1,7 +1,7 @@
 import { matchesGlob } from "./glob";
 
-export type Job = "rust" | "ts" | "wasm" | "native";
-export const JOBS: readonly Job[] = ["rust", "ts", "wasm", "native"];
+export type Job = "rust" | "ts" | "wasm" | "native" | "deny";
+export const JOBS: readonly Job[] = ["rust", "ts", "wasm", "native", "deny"];
 
 const DOCS = [
   "docs/**",
@@ -11,10 +11,18 @@ const DOCS = [
 ];
 
 /**
+ * Job, результат которого зависит только от нескольких файлов, задаётся положительным списком: перечислять всё остальное было бы
+ * неудобно. Для такого job неизвестный файл не влияет на результат (проверяются только манифесты и настройки).
+ */
+const ONLY = {
+  deny: ["Cargo.toml", "Cargo.lock", "**/Cargo.toml", "deny.toml", ".github/workflows/**"],
+} satisfies Partial<Record<Job, string[]>>;
+
+/**
  * Файлы, которые заведомо не влияют на результат job. Всё, чего здесь нет, считается влияющим: ошибка в списке
  * приводит к лишнему запуску, а не к пропуску проверки. Поэтому списки перечисляют «безопасное», а не «нужное».
  */
-const IRRELEVANT: Record<Job, string[]> = {
+const IRRELEVANT: Record<Exclude<Job, keyof typeof ONLY>, string[]> = {
   rust: [
     ...DOCS,
     "apps/web/**",
@@ -57,9 +65,12 @@ const IRRELEVANT: Record<Job, string[]> = {
 export function select(changedFiles: string[]): Record<Job, boolean> {
   const result = {} as Record<Job, boolean>;
   for (const job of JOBS) {
-    result[job] =
-      changedFiles.length === 0 ||
-      changedFiles.some((file) => !IRRELEVANT[job].some((glob) => matchesGlob(glob, file)));
+    const only = (ONLY as Partial<Record<Job, string[]>>)[job];
+    const relevant = (file: string) =>
+      only !== undefined
+        ? only.some((glob) => matchesGlob(glob, file))
+        : !IRRELEVANT[job as keyof typeof IRRELEVANT].some((glob) => matchesGlob(glob, file));
+    result[job] = changedFiles.length === 0 || changedFiles.some(relevant);
   }
   return result;
 }
