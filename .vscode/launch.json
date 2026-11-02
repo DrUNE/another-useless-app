@@ -1,0 +1,88 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Web frontend: launch Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    },
+    {
+      "name": "Web frontend: attach Chrome",
+      "type": "chrome",
+      "request": "attach",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "port": 9222
+    },
+    {
+      "name": "CLI backend: development",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["build", "-p", "app-cli"],
+        "filter": { "name": "app", "kind": "bin" }
+      },
+      "args": ["fetch", "https://example.com", "${workspaceFolder}/target/debug-example.html"],
+      "cwd": "${workspaceFolder}",
+      "sourceLanguages": ["rust"]
+    },
+    {
+      "name": "CLI backend: release",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["build", "-p", "app-cli", "--release", "--config", "profile.release.debug=true"],
+        "filter": { "name": "app", "kind": "bin" }
+      },
+      "args": ["fetch", "https://example.com", "${workspaceFolder}/target/release-example.html"],
+      "cwd": "${workspaceFolder}",
+      "sourceLanguages": ["rust"]
+    },
+    {
+      "name": "Native backend: development",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["build", "-p", "app-native"],
+        "filter": { "name": "app-native", "kind": "bin" }
+      },
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS": "--remote-debugging-port=9222"
+      },
+      "sourceLanguages": ["rust"]
+    },
+    {
+      "name": "Native backend: release",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": [
+          "build",
+          "-p",
+          "app-native",
+          "--release",
+          "--config",
+          "profile.release.debug=true"
+        ],
+        "filter": { "name": "app-native", "kind": "bin" }
+      },
+      "cwd": "${workspaceFolder}",
+      "sourceLanguages": ["rust"],
+      "preLaunchTask": "native: build frontend"
+    },
+    {
+      "name": "Native frontend: attach WebView2 (Windows)",
+      "type": "chrome",
+      "request": "attach",
+      "url": "http://localhost:1420",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "port": 9222
+    }
+  ]
+}
