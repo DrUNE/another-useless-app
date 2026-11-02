@@ -21,6 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      # Версия CLI обязана совпадать с крейтом wasm-bindgen: берём её из Cargo.lock, а не дублируем.
+      - id: wbg
+        run: echo "version=$(cargo pkgid wasm-bindgen | sed 's/.*@//')" >> "$GITHUB_OUTPUT"
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@${{ steps.wbg.outputs.version }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
