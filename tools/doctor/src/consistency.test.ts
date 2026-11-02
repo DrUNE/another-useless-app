@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -10,6 +10,58 @@ import { packageManagerVersion, readPackageList, toolchainChannel } from "./pars
 // как оно проявится как «у меня работает».
 const root = join(import.meta.dirname, "../../..");
 const read = (path: string) => readFileSync(join(root, path), "utf8");
+
+const legacyRussianDocs = new Set([
+  "docs/adr/README.md",
+  "docs/adr/0001-record-architecture-decisions.md",
+  "docs/adr/0002-rust-core-wasm-for-web.md",
+  "docs/adr/0003-ports-and-adapters.md",
+  "docs/adr/0004-ports-futures-not-send.md",
+  "docs/adr/0005-bun-workspaces-with-catalog.md",
+  "docs/adr/0006-independent-builds.md",
+  "docs/adr/0007-protect-main-squash-only.md",
+  "docs/adr/0008-wasm-boundary.md",
+  "docs/adr/0009-typed-ipc-tauri-specta.md",
+  "docs/adr/0010-native-app-isolation-and-trust.md",
+  "docs/adr/0011-oxc-lint-and-format.md",
+  "docs/adr/0012-reproducible-dev-environment.md",
+  "docs/adr/0013-wasm-boundary-tests-in-typescript.md",
+  "docs/adr/0014-ui-core-boundary.md",
+  "docs/adr/0015-dependency-boundaries-as-data.md",
+  "docs/adr/0016-web-e2e-in-a-real-browser.md",
+  "docs/adr/0017-os-matrix-gate-and-path-selection.md",
+  "docs/adr/0018-dependency-supply-chain-checks.md",
+  "docs/adr/0019-licenses.md",
+  "docs/learning/rust-for-typescript-developers.md",
+  "docs/learning/solid-and-tailwind-for-react-developers.md",
+]);
+
+function markdownFiles(directory: string): string[] {
+  return readdirSync(join(root, directory), { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name).replaceAll("\\", "/");
+    if (entry.isDirectory()) return markdownFiles(path);
+    return entry.name.endsWith(".md") ? [path] : [];
+  });
+}
+
+describe("documentation languages", () => {
+  it("requires both language versions for every non-legacy document", () => {
+    const documents = [
+      "README.md",
+      "README.ru.md",
+      "AGENTS.md",
+      "AGENTS.ru.md",
+      ...markdownFiles("docs"),
+    ];
+    for (const document of documents) {
+      if (document.endsWith(".ru.md")) {
+        expect(documents, document).toContain(document.replace(/\.ru\.md$/, ".md"));
+      } else if (!legacyRussianDocs.has(document)) {
+        expect(documents, document).toContain(document.replace(/\.md$/, ".ru.md"));
+      }
+    }
+  });
+});
 
 describe("version pins agree across the repository", () => {
   it("devcontainer builds with the same bun as packageManager", () => {

@@ -26,7 +26,8 @@
       "oxlint-tsgolint": "7.0.2005",
       "@types/bun": "1.4.4",
       "@types/node": "26.6.6",
-      "playwright-core": "1.64.1"
+      "playwright-core": "1.64.1",
+      "typedoc": "0.28.20"
     }
   },
   "type": "module",
@@ -54,7 +55,10 @@
     "doctor": "bun tools/doctor/src/index.ts",
     "boundaries": "bun tools/boundaries/src/index.ts",
     "test:e2e": "bun run build:web && bun run --filter @app/e2e test:e2e",
-    "deny": "cargo deny --locked check"
+    "deny": "cargo deny --locked check",
+    "docs": "bun run build:wasm && bun run docs:rust && bun run docs:ts",
+    "docs:rust": "cargo doc --workspace --no-deps --target-dir target/docs",
+    "docs:ts": "bun run --filter @app/api-docs docs"
   },
   "devDependencies": {
     "eslint-plugin-solid": "0.18.1",
