@@ -55,6 +55,7 @@ const IRRELEVANT: Record<Exclude<Job, keyof typeof ONLY>, string[]> = {
     "tests/**",
     "tools/doctor/**",
     "tools/boundaries/**",
+    "tools/dev-server/**",
     ".devcontainer/**",
     ".oxlintrc.json",
     ".oxfmtrc.json",

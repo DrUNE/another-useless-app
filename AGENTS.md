@@ -32,6 +32,7 @@
 - `packages/config` — общие tsconfig и `theme.css` (Tailwind).
 - `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
 - `tools/ci` — выбор jobs CI по изменённым файлам (функция `select` с тестами), ADR-0017.
+- `tools/dev-server` — запуск Vite в фоне для browser launch в редакторах, ожидание готовности и остановка.
 - `deny.toml` — политика зависимостей Rust для `cargo-deny`; `.github/workflows/audit.yml` — еженедельная проверка уязвимостей.
 - `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
 - `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
@@ -96,6 +97,8 @@ bun run check:wasm                # сборка WASM + typecheck кода, за
 bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
 bun run test:e2e                  # сквозной сценарий веба в настоящем браузере (ADR-0016; нужен Chrome/Chromium, CHROME_PATH)
 bun run dev:web                   # dev-сервер web (Vite; сначала собирает WASM)
+bun run dev:web:start             # обеспечить фоновый Vite для browser launch
+bun run dev:web:stop              # остановить Vite, запущенный через dev:web:start
 bun run build:web                 # продакшен-сборка web в apps/web/dist
 bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)
 bun run build:native -- --no-bundle   # релизная сборка без упаковки (как в CI)

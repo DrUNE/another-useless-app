@@ -62,17 +62,27 @@ describe("version pins agree across the repository", () => {
   });
   it("VS Code and Zed keep shared debug scenarios and tasks in sync", () => {
     const vscodeLaunch = JSON.parse(read(".vscode/launch.json")) as {
-      configurations: Array<{ name: string }>;
+      configurations: Array<{ name: string; request: string; preLaunchTask?: string }>;
     };
     const zedDebug = JSON.parse(read(".zed/debug.json")) as Array<{
       label: string;
+      request: string;
       adapter?: string;
-      build?: { command: string };
+      build?: string | { command: string };
     }>;
     const vscodeNames = vscodeLaunch.configurations.map((config) => config.name);
     for (const config of zedDebug) {
       expect(vscodeNames).toContain(config.label);
-      if (config.adapter === "CodeLLDB") expect(config.build?.command).toBe("cargo");
+      if (config.adapter === "CodeLLDB" && typeof config.build === "object")
+        expect(config.build.command).toBe("cargo");
+      if (config.label.startsWith("Web frontend:")) {
+        expect(config.build === "web: ensure dev server").toBe(config.request === "launch");
+      }
+    }
+    for (const config of vscodeLaunch.configurations) {
+      if (config.name.startsWith("Web frontend:")) {
+        expect(config.preLaunchTask === "web: ensure dev server").toBe(config.request === "launch");
+      }
     }
     expect(vscodeNames).toContain("Web frontend: launch Firefox");
     expect(vscodeNames).toContain("Web frontend: attach Firefox");

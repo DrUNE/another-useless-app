@@ -4,6 +4,7 @@
     "adapter": "JavaScript",
     "type": "chrome",
     "request": "launch",
+    "build": "web: ensure dev server",
     "url": "http://localhost:5173",
     "webRoot": "$ZED_WORKTREE_ROOT",
     "sourceMaps": true
@@ -13,6 +14,7 @@
     "adapter": "JavaScript",
     "type": "chrome",
     "request": "launch",
+    "build": "web: ensure dev server",
     "runtimeExecutable": "$CHROME_PATH",
     "url": "http://localhost:5173",
     "webRoot": "$ZED_WORKTREE_ROOT",

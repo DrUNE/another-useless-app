@@ -7,7 +7,8 @@
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "preLaunchTask": "web: ensure dev server"
     },
     {
       "name": "Web frontend: launch Chromium (CHROME_PATH)",
@@ -16,7 +17,8 @@
       "runtimeExecutable": "${env:CHROME_PATH}",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "preLaunchTask": "web: ensure dev server"
     },
     {
       "name": "Web frontend: attach Chromium",
@@ -33,7 +35,8 @@
       "request": "launch",
       "reAttach": true,
       "url": "http://localhost:5173/",
-      "webRoot": "${workspaceFolder}"
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "web: ensure dev server"
     },
     {
       "name": "Web frontend: attach Firefox",
