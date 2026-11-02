@@ -108,6 +108,9 @@ VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS
 
 #### Отладка
 
+Пошаговые инструкции с панелями, кнопками и горячими клавишами:
+[Отладка frontend и backend в VS Code и Zed](docs/learning/editor-debugging.md).
+
 Сценарии находятся в `.vscode/launch.json` и `.zed/debug.json`, задачи — в `.vscode/tasks.json` и
 `.zed/tasks.json`. В VS Code задача запускается через **Tasks: Run Task**, отладка — по **F5**;
 в Zed — через **task: spawn** и **F4** соответственно. Общие сценарии и задачи совпадают; Firefox
