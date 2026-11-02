@@ -20,7 +20,8 @@
         "oxc.oxc-vscode",
         "bradlc.vscode-tailwindcss",
         "tauri-apps.tauri-vscode",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "firefox-devtools.vscode-firefox-debug"
       ]
     }
   }

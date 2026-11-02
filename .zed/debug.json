@@ -1,6 +1,6 @@
 [
   {
-    "label": "Web frontend: launch Chrome",
+    "label": "Web frontend: launch Chromium",
     "adapter": "JavaScript",
     "type": "chrome",
     "request": "launch",
@@ -9,7 +9,17 @@
     "sourceMaps": true
   },
   {
-    "label": "Web frontend: attach Chrome",
+    "label": "Web frontend: launch Chromium (CHROME_PATH)",
+    "adapter": "JavaScript",
+    "type": "chrome",
+    "request": "launch",
+    "runtimeExecutable": "$CHROME_PATH",
+    "url": "http://localhost:5173",
+    "webRoot": "$ZED_WORKTREE_ROOT",
+    "sourceMaps": true
+  },
+  {
+    "label": "Web frontend: attach Chromium",
     "adapter": "JavaScript",
     "type": "chrome",
     "request": "attach",
@@ -22,9 +32,9 @@
     "label": "CLI backend: development",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "cargo": {
-      "args": ["build", "-p", "app-cli"],
-      "filter": { "name": "app", "kind": "bin" }
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "app-cli"]
     },
     "args": ["fetch", "https://example.com", "$ZED_WORKTREE_ROOT/target/debug-example.html"],
     "cwd": "$ZED_WORKTREE_ROOT",
@@ -34,9 +44,9 @@
     "label": "CLI backend: release",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "cargo": {
-      "args": ["build", "-p", "app-cli", "--release", "--config", "profile.release.debug=true"],
-      "filter": { "name": "app", "kind": "bin" }
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "app-cli", "--release", "--config", "profile.release.debug=true"]
     },
     "args": ["fetch", "https://example.com", "$ZED_WORKTREE_ROOT/target/release-example.html"],
     "cwd": "$ZED_WORKTREE_ROOT",
@@ -46,9 +56,9 @@
     "label": "Native backend: development",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "cargo": {
-      "args": ["build", "-p", "app-native"],
-      "filter": { "name": "app-native", "kind": "bin" }
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "app-native"]
     },
     "cwd": "$ZED_WORKTREE_ROOT",
     "env": {
@@ -60,9 +70,9 @@
     "label": "Native backend: release",
     "adapter": "CodeLLDB",
     "request": "launch",
-    "cargo": {
-      "args": ["build", "-p", "app-native", "--release", "--config", "profile.release.debug=true"],
-      "filter": { "name": "app-native", "kind": "bin" }
+    "build": {
+      "command": "cargo",
+      "args": ["build", "-p", "app-native", "--release", "--config", "profile.release.debug=true"]
     },
     "cwd": "$ZED_WORKTREE_ROOT",
     "sourceLanguages": ["rust"]
