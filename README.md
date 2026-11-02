@@ -13,12 +13,12 @@
 Каждая цель собирается отдельно и не тянет чужие тулчейны (сборка CLI не требует Node/Vite,
 сборка web не требует Rust-приложений).
 
-| Цель | Стек | Статус |
-|---|---|---|
-| CLI | Rust (`crates/cli`) | готово |
-| Web | Solid 2 + Tailwind + ядро в WASM | работает: UI на WASM-ядре, файлы в OPFS (проверено в Chromium) |
-| Desktop | Tauri 2 | работает на Linux (IPC, тесты, сборка, rpm); Windows и macOS не проверялись |
-| Mobile | Tauri 2 (Android, iOS) | запланировано |
+| Цель    | Стек                             | Статус                                                                      |
+| ------- | -------------------------------- | --------------------------------------------------------------------------- |
+| CLI     | Rust (`crates/cli`)              | готово                                                                      |
+| Web     | Solid 2 + Tailwind + ядро в WASM | работает: UI на WASM-ядре, файлы в OPFS (проверено в Chromium)              |
+| Desktop | Tauri 2                          | работает на Linux (IPC, тесты, сборка, rpm); Windows и macOS не проверялись |
+| Mobile  | Tauri 2 (Android, iOS)           | запланировано                                                               |
 
 ## Стек
 
@@ -100,8 +100,32 @@ bun run doctor             # что ещё не хватает; подскаже
 оба редактора используют локальные Oxlint и Oxfmt: диагностика — по общему `.oxlintrc.json`, форматирование — при
 сохранении. Rust форматируется через `rust-analyzer`.
 
-VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS и Tauri; в devcontainer они уже установлены.
-Zed автоматически установит Oxc, HTML, TOML и Dockerfile; Rust и TypeScript поддерживаются нативно.
+VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS, Tauri и CodeLLDB; в devcontainer они уже установлены.
+Zed автоматически установит Oxc, HTML, TOML и Dockerfile; Rust, TypeScript и их debug-адаптеры поддерживаются нативно.
+
+#### Отладка
+
+Сценарии находятся в `.vscode/launch.json` и `.zed/debug.json`, задачи — в `.vscode/tasks.json` и
+`.zed/tasks.json`. В VS Code задача запускается через **Tasks: Run Task**, отладка — по **F5**;
+в Zed — через **task: spawn** и **F4** соответственно. Наборы сценариев и задач одинаковы.
+
+| Сценарий                                     | Подготовка                                                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Web frontend: launch Chrome`                | Запустить задачу `web: dev server` или `bun run dev:web`; сценарий откроет новое окно браузера.                                      |
+| `Web frontend: attach Chrome`                | Запустить Vite и Chrome/Chromium с флагами `--remote-debugging-port=9222` и отдельным `--user-data-dir`.                             |
+| `CLI backend: development` / `release`       | Дополнительная подготовка не нужна: CodeLLDB вызовет Cargo. Пример скачивает `https://example.com` в игнорируемый каталог `target/`. |
+| `Native backend: development`                | Запустить задачу `native: dev server`, затем сценарий; он откроет окно Tauri.                                                        |
+| `Native backend: release`                    | В VS Code frontend соберётся через `preLaunchTask`; в Zed сначала запустить `native: build frontend`.                                |
+| `Native frontend: attach WebView2 (Windows)` | Сначала запустить `Native backend: development`: он передаёт WebView2 порт 9222. Затем запустить attach-сценарий.                    |
+
+Release-сценарии Rust передают Cargo `profile.release.debug=true`: оптимизация остаётся release, но у отладчика
+есть символы и исходники. Для web source maps в dev-сервере Vite включены, а `webRoot` указывает на корень
+монорепозитория, чтобы breakpoints работали и в `apps/web`, и в `packages/app`.
+
+Frontend Tauri на Linux и macOS подключается к штатному WebView Inspector (**Ctrl+Shift+I** на Linux,
+**Cmd+Option+I** на macOS), а не к Chrome-совместимому порту. Attach к WebView2 относится только к Windows.
+Если редактор не находит браузер автоматически, добавьте в launch-сценарий `runtimeExecutable` с путём к
+Chrome/Chromium, например `/usr/bin/chromium`.
 
 ## Команды
 

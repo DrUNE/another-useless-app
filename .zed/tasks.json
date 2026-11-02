@@ -1,0 +1,20 @@
+[
+  {
+    "label": "web: dev server",
+    "command": "bun",
+    "args": ["run", "dev:web"],
+    "use_new_terminal": true
+  },
+  {
+    "label": "native: dev server",
+    "command": "bun",
+    "args": ["run", "--filter", "@app/native", "dev"],
+    "use_new_terminal": true
+  },
+  {
+    "label": "native: build frontend",
+    "command": "bun",
+    "args": ["run", "--filter", "@app/native", "build"],
+    "hide": "on_success"
+  }
+]

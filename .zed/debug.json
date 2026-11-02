@@ -1,0 +1,80 @@
+[
+  {
+    "label": "Web frontend: launch Chrome",
+    "adapter": "JavaScript",
+    "type": "chrome",
+    "request": "launch",
+    "url": "http://localhost:5173",
+    "webRoot": "$ZED_WORKTREE_ROOT",
+    "sourceMaps": true
+  },
+  {
+    "label": "Web frontend: attach Chrome",
+    "adapter": "JavaScript",
+    "type": "chrome",
+    "request": "attach",
+    "url": "http://localhost:5173",
+    "webRoot": "$ZED_WORKTREE_ROOT",
+    "sourceMaps": true,
+    "port": 9222
+  },
+  {
+    "label": "CLI backend: development",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "cargo": {
+      "args": ["build", "-p", "app-cli"],
+      "filter": { "name": "app", "kind": "bin" }
+    },
+    "args": ["fetch", "https://example.com", "$ZED_WORKTREE_ROOT/target/debug-example.html"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "CLI backend: release",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "cargo": {
+      "args": ["build", "-p", "app-cli", "--release", "--config", "profile.release.debug=true"],
+      "filter": { "name": "app", "kind": "bin" }
+    },
+    "args": ["fetch", "https://example.com", "$ZED_WORKTREE_ROOT/target/release-example.html"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Native backend: development",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "cargo": {
+      "args": ["build", "-p", "app-native"],
+      "filter": { "name": "app-native", "kind": "bin" }
+    },
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "env": {
+      "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS": "--remote-debugging-port=9222"
+    },
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Native backend: release",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "cargo": {
+      "args": ["build", "-p", "app-native", "--release", "--config", "profile.release.debug=true"],
+      "filter": { "name": "app-native", "kind": "bin" }
+    },
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "sourceLanguages": ["rust"]
+  },
+  {
+    "label": "Native frontend: attach WebView2 (Windows)",
+    "adapter": "JavaScript",
+    "type": "chrome",
+    "request": "attach",
+    "url": "http://localhost:1420",
+    "webRoot": "$ZED_WORKTREE_ROOT",
+    "sourceMaps": true,
+    "port": 9222
+  }
+]

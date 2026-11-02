@@ -60,6 +60,24 @@ describe("version pins agree across the repository", () => {
     expect(exceptions.length).toBeGreaterThan(0);
     for (const line of exceptions) expect(line, line).toMatch(/reason = ".{20,}"/);
   });
+  it("VS Code and Zed provide the same debug scenarios and tasks", () => {
+    const vscodeLaunch = JSON.parse(read(".vscode/launch.json")) as {
+      configurations: Array<{ name: string }>;
+    };
+    const zedDebug = JSON.parse(read(".zed/debug.json")) as Array<{ label: string }>;
+    expect(vscodeLaunch.configurations.map((config) => config.name).toSorted()).toEqual(
+      zedDebug.map((config) => config.label).toSorted(),
+    );
+
+    const vscodeTasks = JSON.parse(read(".vscode/tasks.json")) as {
+      tasks: Array<{ label: string }>;
+    };
+    const zedTasks = JSON.parse(read(".zed/tasks.json")) as Array<{ label: string }>;
+    expect(vscodeTasks.tasks.map((task) => task.label).toSorted()).toEqual(
+      zedTasks.map((task) => task.label).toSorted(),
+    );
+  });
+
   it("the licenses are in place and every manifest declares them", () => {
     const mit = read("LICENSE");
     expect(mit).toMatch(/^MIT License\n/);

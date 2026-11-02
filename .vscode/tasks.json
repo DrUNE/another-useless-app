@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "web: dev server",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "dev:web"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated" }
+    },
+    {
+      "label": "native: dev server",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "--filter", "@app/native", "dev"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated" }
+    },
+    {
+      "label": "native: build frontend",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "--filter", "@app/native", "build"],
+      "problemMatcher": []
+    }
+  ]
+}
