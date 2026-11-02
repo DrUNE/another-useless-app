@@ -6,6 +6,7 @@ import {
   packageManagerVersion,
   readPackageList,
   toolchainChannel,
+  toolchainComponents,
   versionFromOutput,
 } from "./parse";
 
@@ -39,6 +40,14 @@ describe("version sources", () => {
   it("reads the Rust channel", () => {
     expect(toolchainChannel('[toolchain]\nchannel = "1.99.1"\n')).toBe("1.99.1");
     expect(toolchainChannel("[toolchain]\n")).toBeUndefined();
+  });
+  it("reads Rust components, including a multiline array", () => {
+    expect(
+      toolchainComponents(
+        '[toolchain]\ncomponents = [\n  "rustfmt",\n  "clippy",\n  "rust-analyzer",\n]\n',
+      ),
+    ).toEqual(["rustfmt", "clippy", "rust-analyzer"]);
+    expect(toolchainComponents("[toolchain]\n")).toEqual([]);
   });
   it("extracts a version from tool output", () => {
     expect(versionFromOutput("rustc 1.99.1 (58cf8f9c3 2026-10-13)")).toBe("1.99.1");

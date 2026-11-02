@@ -101,7 +101,9 @@ bun run doctor             # что ещё не хватает; подскаже
 сохранении. Rust форматируется через `rust-analyzer`.
 
 VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS, Tauri и CodeLLDB; в devcontainer они уже установлены.
-Zed автоматически установит Oxc, HTML, TOML и Dockerfile; Rust, TypeScript и их debug-адаптеры поддерживаются нативно.
+Для Zed установите расширения Oxc, HTML, TOML и Dockerfile через **zed: extensions**. Автоматическая установка
+настраивается только в пользовательском `settings.json`, не в проектном. Rust, TypeScript и их debug-адаптеры
+поддерживаются нативно.
 
 #### Отладка
 

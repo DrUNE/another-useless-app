@@ -59,6 +59,38 @@ describe("version checks", () => {
     expect(outcome.detail).toBe("не установлен");
   });
 
+  it("detect missing Rust components declared in rust-toolchain.toml", () => {
+    const toolchain =
+      '[toolchain]\nchannel = "1.99.1"\ncomponents = ["rustfmt", "clippy", "rust-analyzer"]\n';
+    const withToolchain = (commands: Commands) =>
+      context(commands, {
+        read: (path) => (path === "rust-toolchain.toml" ? toolchain : FILES[path]),
+      });
+    const missing = find("components").run(
+      withToolchain({
+        "rustup component list --installed": {
+          ok: true,
+          output: "rustfmt-x86_64-unknown-linux-gnu\n",
+        },
+      }),
+    );
+    expect(missing.status).toBe("fail");
+    expect(missing.detail).toContain("clippy");
+    expect(missing.detail).toContain("rust-analyzer");
+    expect(missing.hint).toContain("rustup toolchain install");
+
+    const present = find("components").run(
+      withToolchain({
+        "rustup component list --installed": {
+          ok: true,
+          output:
+            "clippy-x86_64-unknown-linux-gnu\nrust-analyzer-x86_64-unknown-linux-gnu\nrustfmt-x86_64-unknown-linux-gnu\n",
+        },
+      }),
+    );
+    expect(present.status).toBe("ok");
+  });
+
   it("detect a missing wasm32 target", () => {
     const missing = context({
       "rustup target list --installed": { ok: true, output: "x86_64-unknown-linux-gnu\n" },

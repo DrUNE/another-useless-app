@@ -23,6 +23,14 @@ export function toolchainChannel(toml: string): string | undefined {
   return /^channel\s*=\s*"([^"]+)"/m.exec(toml)?.[1];
 }
 
+/** Компоненты из массива `components` в rust-toolchain.toml. */
+export function toolchainComponents(toml: string): string[] {
+  const array = /^components\s*=\s*\[([\s\S]*?)\]/m.exec(toml)?.[1] ?? "";
+  return [...array.matchAll(/"([^"]+)"/g)].flatMap((match) =>
+    match[1] === undefined ? [] : [match[1]],
+  );
+}
+
 /** Версия из вывода вида `rustc 1.99.1 (...)` или `wasm-bindgen 0.2.130`. */
 export function versionFromOutput(output: string): string | undefined {
   return /\b(\d+\.\d+\.\d+(?:-[\w.]+)?)\b/.exec(output)?.[1];
