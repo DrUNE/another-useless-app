@@ -60,14 +60,22 @@ describe("version pins agree across the repository", () => {
     expect(exceptions.length).toBeGreaterThan(0);
     for (const line of exceptions) expect(line, line).toMatch(/reason = ".{20,}"/);
   });
-  it("VS Code and Zed provide the same debug scenarios and tasks", () => {
+  it("VS Code and Zed keep shared debug scenarios and tasks in sync", () => {
     const vscodeLaunch = JSON.parse(read(".vscode/launch.json")) as {
       configurations: Array<{ name: string }>;
     };
-    const zedDebug = JSON.parse(read(".zed/debug.json")) as Array<{ label: string }>;
-    expect(vscodeLaunch.configurations.map((config) => config.name).toSorted()).toEqual(
-      zedDebug.map((config) => config.label).toSorted(),
-    );
+    const zedDebug = JSON.parse(read(".zed/debug.json")) as Array<{
+      label: string;
+      adapter?: string;
+      build?: { command: string };
+    }>;
+    const vscodeNames = vscodeLaunch.configurations.map((config) => config.name);
+    for (const config of zedDebug) {
+      expect(vscodeNames).toContain(config.label);
+      if (config.adapter === "CodeLLDB") expect(config.build?.command).toBe("cargo");
+    }
+    expect(vscodeNames).toContain("Web frontend: launch Firefox");
+    expect(vscodeNames).toContain("Web frontend: attach Firefox");
 
     const vscodeTasks = JSON.parse(read(".vscode/tasks.json")) as {
       tasks: Array<{ label: string }>;
