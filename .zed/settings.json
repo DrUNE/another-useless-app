@@ -1,10 +1,4 @@
 {
-  "auto_install_extensions": {
-    "dockerfile": true,
-    "html": true,
-    "oxc": true,
-    "toml": true
-  },
   "languages": {
     "CSS": {
       "format_on_save": "on",

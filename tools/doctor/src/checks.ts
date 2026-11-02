@@ -4,6 +4,7 @@ import {
   packageManagerVersion,
   readPackageList,
   toolchainChannel,
+  toolchainComponents,
   versionFromOutput,
 } from "./parse";
 
@@ -104,6 +105,33 @@ export const checks: Check[] = [
         "rust-toolchain.toml",
         "в корне репозитория выполните `rustup toolchain install` (rustup: https://rustup.rs)",
       ),
+  },
+  {
+    group: "core",
+    title: "Rust components (по rust-toolchain.toml)",
+    run: (ctx) => {
+      const expected = toolchainComponents(ctx.read("rust-toolchain.toml") ?? "");
+      const installed = ctx.run("rustup", ["component", "list", "--installed"]);
+      if (!installed.ok)
+        return {
+          status: "fail",
+          detail: "не удалось получить список установленных компонентов",
+          hint: "в корне репозитория выполните `rustup toolchain install`",
+        };
+
+      const names = installed.output.split(/\s+/);
+      const missing = expected.filter(
+        (component) =>
+          !names.some((name) => name === component || name.startsWith(`${component}-`)),
+      );
+      return missing.length === 0
+        ? { status: "ok", detail: expected.join(", ") }
+        : {
+            status: "fail",
+            detail: `не найдено: ${missing.join(", ")}`,
+            hint: "в корне репозитория выполните `rustup toolchain install` (компоненты берутся из rust-toolchain.toml)",
+          };
+    },
   },
   {
     group: "wasm",
