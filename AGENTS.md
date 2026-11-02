@@ -1,166 +1,189 @@
 # AGENTS.md
 
-Инструкции для ИИ-агентов, работающих в этом репозитории. Обзор проекта — в `README.md`.
+[Русская версия](AGENTS.ru.md)
 
-## Контекст
+Instructions for AI agents working in this repository. See `README.md` for the project overview.
 
-Учебный проект по практикам кроссплатформенной архитектуры. Ценность в понимании решений,
-а не в самом приложении.
+## Context
 
-- Двигайтесь небольшими шагами: одна идея за раз, с проверкой сборкой/тестами.
-- Объясняйте, какое решение принято, почему и какая была альтернатива.
-- Перед изменением архитектуры прочитайте `docs/adr/`. Значимые решения фиксируйте новым ADR
-  (формат и правила — в `docs/adr/0001-*`); принятые ADR не переписывайте, а заменяйте новыми.
-- Уровень пользователя: TypeScript и React — высокий; Rust, Solid, Tailwind — низкий. В этих трёх
-  областях применяйте лучшие практики и объясняйте, почему именно так.
-- Проводите аналогии с React/TS и отдельно выделяйте концепты, которые выглядят похоже, но работают
-  иначе (например: компонент Solid выполняется один раз, а не на каждый рендер; сигнал — это функция,
-  а не значение `useState`; деструктуризация props ломает реактивность; `Show`/`For` вместо
-  тернарников и `map`; в Rust `Result` вместо исключений, trait не то же самое, что interface).
-  В TS/React объясняйте только нетривиальное.
-- Общайтесь с пользователем по-русски. Код, идентификаторы и коммиты — на английском.
+This is a learning project about cross-platform architecture. Understanding decisions matters more
+than the application itself.
 
-## Структура
+- Work in small steps: one idea at a time, verified by builds/tests.
+- Explain the chosen decision, its rationale, and the alternative.
+- Read `docs/adr/` before changing architecture. Record significant decisions in a new ADR
+  (format and rules in `docs/adr/0001-*`); replace accepted ADRs with new ones instead of rewriting.
+- User experience: TypeScript and React — high; Rust, Solid, Tailwind — low. Apply best practices in
+  these three areas and explain why.
+- Use React/TS analogies and explicitly call out concepts that look similar but work differently
+  (Solid components run once, unlike React renders; signals are functions, not `useState` values;
+  destructuring props breaks reactivity; use `Show`/`For` instead of ternaries and `map`; Rust uses
+  `Result` instead of exceptions, and a trait is not the same as an interface).
+- Explain only non-trivial TypeScript/React topics.
+- Communicate with the user in Russian. Code, identifiers, and commits are in English.
 
-- `crates/core` — домен, use-cases, порты (`Fs`, `Http`). Платформо-независимый.
-- `crates/platform-native` — нативные адаптеры портов (tokio, reqwest).
-- `crates/cli` — консольное приложение (бинарник `app`).
-- `crates/core-wasm` — тонкая `wasm-bindgen`-привязка ядра для браузера (логики нет).
-- `packages/platform` — TS-порты (`Fs`, `Http`, `Platform`).
-- `packages/platform-web` — адаптеры портов для браузера (OPFS, `fetch`).
-- `packages/core-wasm` — сборка WASM, TS-мост портов (`src/bridge.ts`), `createCore(platform)`.
-- `packages/config` — общие tsconfig и `theme.css` (Tailwind).
-- `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
-- `tools/ci` — выбор jobs CI по изменённым файлам (функция `select` с тестами), ADR-0017.
-- `tools/dev-server` — запуск Vite в фоне для browser launch в редакторах, ожидание готовности и остановка.
-- `deny.toml` — политика зависимостей Rust для `cargo-deny`; `.github/workflows/audit.yml` — еженедельная проверка уязвимостей.
-- `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
-- `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
-  и `defineCoreContract` для тестов. Ни от чего не зависит.
-- `packages/app` — общий UI на Solid. Знает только `@app/core-api`; ядро берёт из `CoreContext`, его подставляет точка входа.
-- `apps/web` — точка входа: создаёт `createCore(createWebPlatform())` (WASM + OPFS + fetch) и кладёт в `CoreContext`.
-  Для dev/build/check собирает WASM, поэтому требует Rust и `wasm-bindgen-cli`.
-- `apps/native` — Tauri 2. `src/` — точка входа с IPC-сервисом (`core.ts`) и сгенерированными привязками
-  (`bindings.ts`); `src-tauri/` — Rust: команды (`commands.rs`), capabilities, `tauri.conf.json`.
-- Планируются: `packages/ui`, `packages/features/*`.
+## Structure
 
-## Жёсткие правила архитектуры
+- `crates/core` — domain, use cases, ports (`Fs`, `Http`). Platform-independent.
+- `crates/platform-native` — native port adapters (tokio, reqwest).
+- `crates/cli` — console application (`app` binary).
+- `crates/core-wasm` — thin `wasm-bindgen` wrapper around the core for browsers (no logic).
+- `packages/platform` — TS ports (`Fs`, `Http`, `Platform`).
+- `packages/platform-web` — browser port adapters (OPFS, `fetch`).
+- `packages/core-wasm` — WASM build, TS port bridge (`src/bridge.ts`), `createCore(platform)`.
+- `packages/config` — shared tsconfig and `theme.css` (Tailwind).
+- `tools/doctor` — environment diagnostics; `tools/boundaries` — dependency boundary checks with
+  rules in `rules.json`.
+- `tools/ci` — selects CI jobs from changed files (`select` with tests), ADR-0017.
+- `tools/dev-server` — background Vite for browser launch, readiness checks, and shutdown.
+- `tools/api-docs` — TypeDoc with its own TypeScript version, isolated from the application's TS 7.
+- `deny.toml` — Rust dependency policy for `cargo-deny`; `.github/workflows/audit.yml` — weekly
+  vulnerability checks.
+- `tests/e2e` — web E2E (`vitest` + `playwright-core`, system Chrome); skipped without a browser,
+  failing with `E2E_REQUIRE_BROWSER=1`.
+- `packages/core-api` — core contract (ADR-0014): `Core`, `CoreError`/`CoreException`,
+  `contract/scenarios.json`, and `defineCoreContract` for tests. No dependencies.
+- `packages/app` — shared Solid UI. Depends only on `@app/core-api`; core comes from `CoreContext`
+  supplied by the entry point.
+- `apps/web` — entry point: creates `createCore(createWebPlatform())` (WASM + OPFS + fetch) and
+  provides it through `CoreContext`. Dev/build/check builds WASM and requires Rust and
+  `wasm-bindgen-cli`.
+- `apps/native` — Tauri 2. `src/` contains the IPC service (`core.ts`) and generated bindings
+  (`bindings.ts`); `src-tauri/` contains Rust commands, capabilities, and `tauri.conf.json`.
+- Planned: `packages/ui`, `packages/features/*`.
 
-1. `app-core` не зависит от tokio, reqwest, `std::fs`, DOM, Tauri. Должен собираться под `wasm32`.
-   Не добавляйте в него зависимости, ломающие это, без обсуждения.
-2. Ввод-вывод только через порты. Новая платформенная возможность = новый порт в `core`
-   (и в `packages/platform` для TS) + адаптеры в `platform-*`.
-3. Futures в портах без требования `Send` (в wasm32 они `!Send`).
-4. Адаптеры и конкретное ядро подключает только точка входа приложения (`cli`, `src-tauri`, `apps/web`,
-   `apps/native/src`). `packages/app` ядра не знает. Приложения не зависят друг от друга.
-5. Нет проверок вида `if (isTauri)` в прикладном коде: отличия выражаются через наличие порта
+## Hard architecture rules
+
+1. `app-core` must not depend on tokio, reqwest, `std::fs`, DOM, or Tauri. It must build for
+   `wasm32`. Do not add dependencies that break this without discussion.
+2. I/O goes only through ports. A new platform capability means a new port in `core` (and in
+   `packages/platform` for TS) plus adapters in `platform-*`.
+3. Port futures do not require `Send` (wasm32 futures are `!Send`).
+4. Only application entry points (`cli`, `src-tauri`, `apps/web`, `apps/native/src`) connect adapters
+   and concrete cores. `packages/app` does not know the core, and applications do not depend on each
+   other.
+5. No `if (isTauri)` checks in application code: differences are expressed through port presence
    (`hasCapability` / `requirePort`).
-6. Сборки независимы: CLI не должен требовать Node/Vite, web — Tauri. (Web требует Rust, таргет wasm32
-   и `wasm-bindgen-cli`: ADR-0008.)
-7. Новую логику покрывайте тестами на фейках портов (см. `crates/core/src/fetcher.rs`).
-8. Граница WASM: `packages/core-wasm/pkg` генерируется и не коммитится. Версия `wasm-bindgen-cli`
-   равна версии крейта `wasm-bindgen` (закреплён как `=x.y.z`). Форма JS-портов описана в Rust
-   (`typescript_custom_section`), TS-типы берутся оттуда, а не пишутся вручную.
-9. Один порт не значит одинаковое поведение: в вебе `Http` подчиняется CORS, а OPFS не является
-   файловой системой пользователя. Не обещайте в UI и текстах нативной семантики для web.
-10. Нативное приложение (ADR-0009, ADR-0010): команды Tauri объявлены в `build.rs` и разрешены в обеих
-    capabilities (`allow-<имя>`); пути из UI недоверенные и ограничены каталогом данных (`resolve()`);
-    TS-привязки генерируются (`bun run update:bindings`), руками `bindings.ts` не правят; системные плагины
-    (`fs`, `http`) не подключаются.
-11. Граница UI и ядра (ADR-0014): интерфейс видит только `Core` из `@app/core-api` и получает его через `CoreContext`;
-    отказ всегда `CoreException` с типизированной причиной `kind` (UI переводит её в текст, `describeError`). Новая
-    возможность ядра = метод в `Core` + сценарии в `contract/scenarios.json` + обе реализации (WASM и IPC) + тесты.
-    Политика путей для недоверенных входов одна: `app_core::path::validate_relative`; CLI как доверенный её не применяет.
+6. Builds are independent: CLI does not require Node/Vite, web does not require Tauri. Web requires
+   Rust, the wasm32 target, and `wasm-bindgen-cli` (ADR-0008).
+7. Cover new logic with tests using fake ports (see `crates/core/src/fetcher.rs`).
+8. WASM boundary: `packages/core-wasm/pkg` is generated and not committed. The `wasm-bindgen-cli`
+   version equals the pinned `wasm-bindgen` crate version (`=x.y.z`). JS port shapes are declared in
+   Rust (`typescript_custom_section`); TS types come from there, not from handwritten duplicates.
+9. One port does not imply identical behavior: browser `Http` obeys CORS, and OPFS is not the user's
+   filesystem. Do not promise native semantics for web in UI or documentation.
+10. Native application (ADR-0009, ADR-0010): Tauri commands are declared in `build.rs` and allowed in
+    both capabilities (`allow-<name>`); UI paths are untrusted and confined to the data directory
+    (`resolve()`); TS bindings are generated (`bun run update:bindings`), never edited manually;
+    system plugins (`fs`, `http`) are not enabled.
+11. UI/core boundary (ADR-0014): UI sees only `Core` from `@app/core-api` via `CoreContext`; failures
+    are always `CoreException` with a typed `kind` (UI translates it via `describeError`). A new core
+    capability requires a `Core` method, scenarios in `contract/scenarios.json`, both implementations
+    (WASM and IPC), and tests. Untrusted paths follow one policy: `app_core::path::validate_relative`;
+    CLI is trusted and does not apply it.
+12. Dependency boundaries (ADR-0015) are data in `tools/boundaries/rules.json`. Update rules with
+    architecture changes and verify each new rule by intentionally violating it in a real manifest
+    (stale rules must fail, not silently pass).
+13. Rust dependencies (ADR-0018): run `bun run deny` after every `Cargo.toml`/`Cargo.lock` change.
+    Exceptions in `deny.toml` require a reason (tested); do not add `openssl`, `native-tls` (TLS is
+    `rustls` only), or packages outside crates.io.
 
-12. Границы зависимостей (ADR-0015) заданы данными в `tools/boundaries/rules.json`. Меняя архитектуру, обновляйте правила
-    и проверяйте новое правило намеренным нарушением в настоящем манифесте (устаревшее правило падает, а не молчит).
-
-13. Зависимости Rust (ADR-0018): после любого изменения `Cargo.toml` и `Cargo.lock` запускайте `bun run deny`. Исключения в `deny.toml`
-    допустимы только с причиной (тест это проверяет); не добавляйте `openssl` и `native-tls` (TLS только `rustls`) и пакеты не с crates.io.
-
-## Команды
+## Commands
 
 ```sh
 bun install
-bun run test:rust                 # Rust-тесты без Tauri (`--exclude app-native`; WebKit не нужен)
-bun run test:native               # Tauri-крейт: IPC, права, актуальность привязок (нужны системные библиотеки)
-bun run update:bindings           # перегенерировать apps/native/src/bindings.ts
-cargo fmt --all --check           # форматирование (CI это проверяет)
-bun run typecheck                 # TS typecheck (tsc из TypeScript 7), Rust не нужен
-bun run lint                      # oxlint --type-aware: типы, границы пакетов, правила Solid
-bun run boundaries                # границы зависимостей по реальным графам Rust и TS (ADR-0015; нужен Rust)
-bun run deny                      # зависимости Rust: уязвимости, лицензии, запреты, источники (ADR-0018; нужен cargo-deny)
-bun run format                    # oxfmt + cargo fmt: исправляет форматирование
-bun run format:check              # проверка форматирования TS (CI)
-bun run test                      # TS-тесты (vitest)
-bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg (core-wasm и web)
-bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
-bun run test:e2e                  # сквозной сценарий веба в настоящем браузере (ADR-0016; нужен Chrome/Chromium, CHROME_PATH)
-bun run dev:web                   # dev-сервер web (Vite; сначала собирает WASM)
-bun run dev:web:start             # обеспечить фоновый Vite для browser launch
-bun run dev:web:stop              # остановить Vite, запущенный через dev:web:start
-bun run build:web                 # продакшен-сборка web в apps/web/dist
-bun run dev:native                # окно Tauri (открывает настоящее окно: не запускайте без просьбы пользователя)
-bun run build:native -- --no-bundle   # релизная сборка без упаковки (как в CI)
+bun run test:rust                 # Rust tests without Tauri (`--exclude app-native`; WebKit not needed)
+bun run test:native               # Tauri crate: IPC, permissions, binding freshness (system libraries required)
+bun run update:bindings           # regenerate apps/native/src/bindings.ts
+cargo fmt --all --check           # formatting (checked by CI)
+bun run typecheck                 # TS typecheck (native tsc from TypeScript 7), Rust not needed
+bun run lint                      # oxlint --type-aware: types, package boundaries, Solid rules
+bun run boundaries                # dependency boundaries from real Rust/TS graphs (ADR-0015; Rust required)
+bun run deny                      # Rust dependencies: advisories, licenses, bans, sources (cargo-deny required)
+bun run format                    # oxfmt + cargo fmt: fixes formatting
+bun run format:check              # TS formatting check (CI)
+bun run test                      # TS tests (vitest)
+bun run docs                      # WASM + generated Rustdoc/TypeDoc HTML in target/docs
+bun run check:wasm                # WASM build and typecheck of pkg-dependent code (core-wasm and web)
+bun run test:wasm                 # TS tests of the Rust↔JS boundary on real WASM (wasm-bindgen-cli required)
+bun run test:e2e                  # end-to-end web scenario in a real browser (Chrome/Chromium, CHROME_PATH)
+bun run dev:web                   # web dev server (Vite; builds WASM first)
+bun run dev:web:start             # ensure background Vite for browser launch
+bun run dev:web:stop              # stop Vite started through dev:web:start
+bun run build:web                 # production web build in apps/web/dist
+bun run dev:native                # Tauri window (opens a real window: do not run without user request)
+bun run build:native -- --no-bundle   # release build without packaging (same as CI)
 cargo run -p app-cli -- fetch <url> <path>
 ```
 
-Перед завершением задачи прогоните `bun run format:check`, `bun run format:check:rust`, `bun run lint`, `bun run test:rust`,
-`bun run typecheck` и `bun run test`; если менялся web — ещё `bun run build:web` (typecheck не ловит
-ошибки плагинов и Tailwind), если менялись `core`, `core-wasm` или `platform-web` — ещё `bun run check:wasm`
-и `bun run test:wasm`; если менялись `src-tauri` или команды — ещё `bun run test:native`.
-Если что-то не удалось проверить (например, нет wasm-таргета), прямо скажите об этом.
+Before finishing, run `bun run format:check`, `bun run format:check:rust`, `bun run lint`,
+`bun run test:rust`, `bun run typecheck`, and `bun run test`. For web changes also run
+`bun run build:web` (typecheck misses plugin and Tailwind errors); for `core`, `core-wasm`, or
+`platform-web` changes also run `bun run check:wasm` and `bun run test:wasm`; for `src-tauri` or
+command changes also run `bun run test:native`. Explicitly report anything that could not be checked.
 
-**Окружение (ADR-0012).** `bun run doctor` показывает, чего не хватает; он только читает и ничего не ставит. Версии живут в
-одном месте: Rust — `rust-toolchain.toml`, bun — `package.json` (`packageManager`), `wasm-bindgen-cli` — `Cargo.lock`, системные
-пакеты Debian — `tools/system-deps/debian.txt`. Не прописывайте версии в `ci.yml` и скриптах, читайте из этих файлов (это проверяет
-`tools/doctor/src/consistency.test.ts`). Node.js не нужен: все проверки идут на bun (ADR-0013). Проверять «без Node.js» на хосте с `fnm`/`nvm` ненадёжно, `bun run` может найти чужой Node; арбитр — контейнер. Образ — `.devcontainer/`.
+**Environment (ADR-0012).** `bun run doctor` reports missing tools and never installs anything.
+Versions have one source: Rust — `rust-toolchain.toml`, bun — `package.json` (`packageManager`),
+`wasm-bindgen-cli` — `Cargo.lock`, Debian system packages — `tools/system-deps/debian.txt`. Do not
+write versions in `ci.yml` or scripts; read these files (checked by `tools/doctor/src/consistency.test.ts`).
+Node.js is not needed: checks run on bun (ADR-0013). Checking “without Node.js” on a host with
+`fnm`/`nvm` is unreliable because `bun run` may find another Node; the container is authoritative.
+Its image is in `.devcontainer/`.
 
-## Стек и версии
+## Stack and versions
 
-- bun workspaces; версии зависимостей закреплены в `catalog` корневого `package.json`.
-  Добавляя пакет, используйте `"catalog:"`, а не отдельную версию.
-- Solid 2 пока в RC (`solid-js` и `@solidjs/web` `2.0.0-rc.x`, плагин Vite — `@solidjs/vite-plugin`
-  `3.0.0-next.x`; `vite-plugin-solid` переименован и не используется). API отличается от Solid 1.x и от React:
-  сверяйтесь с `node_modules/solid-js/CHEATSHEET.md` и `docs/learning/`, а не с памятью и старыми туториалами.
-  В tsconfig `jsxImportSource` — `@solidjs/web`; DOM-API (`render` и др.) импортируются из `@solidjs/web`.
-- TypeScript 7: нативный компилятор запускается как `tsc` (не `tsgo`).
-- Tailwind 4 в CSS-first режиме; тема в `packages/config/theme.css`, источники классов через `@source`.
-- Rust edition 2024, resolver 3. Зависимости общих крейтов — через `[workspace.dependencies]`.
+- bun workspaces; dependency versions are pinned in the root `package.json` `catalog`. Add packages
+  with `"catalog:"`, not a separate version.
+- Solid 2 is currently RC (`solid-js` and `@solidjs/web` `2.0.0-rc.x`; Vite plugin
+  `@solidjs/vite-plugin` `3.0.0-next.x`; `vite-plugin-solid` was renamed and is unused). APIs differ
+  from Solid 1.x and React: consult `node_modules/solid-js/CHEATSHEET.md` and `docs/learning/`, not
+  memory or old tutorials. `jsxImportSource` is `@solidjs/web`; DOM APIs (`render`, etc.) are imported
+  from `@solidjs/web`.
+- TypeScript 7: the native compiler is invoked as `tsc` (not `tsgo`).
+- Tailwind 4 uses CSS-first mode; theme is in `packages/config/theme.css`, class sources via `@source`.
+- Rust edition 2024, resolver 3. Shared crate dependencies use `[workspace.dependencies]`.
 
-## Стиль
+## Style
 
-- Rust: форматирование `cargo fmt`, ошибки через `thiserror` в библиотеках.
-- TS/TSX/JSON/CSS: форматирует `oxfmt` (`bun run format`), линтит `oxlint` (ADR-0011). Не включайте плагин `react`
-  и правило `solid/imports` (они для React и Solid 1.x). Сгенерированные файлы (`bindings.ts`, `pkg/`) не форматируйте
-  и не линтите: они в `ignorePatterns`.
-- Границы между пакетами заданы правилами `no-restricted-imports` в `.oxlintrc.json`. Новую границу проверяйте
-  намеренным нарушением: шаблоны в стиле gitignore, `*` не пересекает `/`, нужны `**`.
-- TS: strict, `verbatimModuleSyntax`, `noUncheckedIndexedAccess`; tsconfig наследуются от `@app/config`.
-- Комментарии объясняют «почему», а не «что». Следуйте плотности комментариев вокруг.
+- Rust: `cargo fmt`, library errors through `thiserror`.
+- TS/TSX/JSON/CSS: `oxfmt` (`bun run format`), linted by `oxlint` (ADR-0011). Do not enable the
+  `react` plugin or `solid/imports` (they target React and Solid 1.x). Generated files (`bindings.ts`,
+  `pkg/`) are in `ignorePatterns` and are not formatted or linted.
+- Package import boundaries use `no-restricted-imports` in `.oxlintrc.json`. Verify new boundaries
+  with an intentional violation: patterns follow gitignore style, `*` does not cross `/`, so use `**`.
+- TS: strict, `verbatimModuleSyntax`, `noUncheckedIndexedAccess`; tsconfig extends `@app/config`.
+- Comments explain “why”, not “what”. Follow the surrounding comment density.
+- Documentation files are bilingual: English is canonical (`.md`), Russian is next to it (`.ru.md`),
+  with cross-links. Special filenames fixed by GitHub may contain both languages inline.
+- Ordinary `//` comments are Russian. Rustdoc (`///`, `//!`) and TSDoc (`/** ... */`) are English so
+  generated API references and quick function docs are release-ready. Do not edit generated files
+  to enforce these rules.
+- Existing legacy documents and API comments are migrated in separate PRs. The consistency test
+  checks language pairs but cannot judge translation quality.
 
-## Рабочий процесс (GitHub)
+## GitHub workflow
 
-Работа ведётся через issue и pull request. Источник правды о планах — GitHub Issues;
-обзор текущих дел — закреплённый issue «Roadmap» со списком задач.
+Work happens through issues and pull requests. GitHub Issues are the source of truth for plans;
+the pinned Roadmap issue provides the overview.
 
-1. **Issue.** Любая работа начинается с issue (шаблон `Task` или `Bug`). Если подходящего нет,
-   создайте его и свяжите с Roadmap.
-2. **Ветка.** Одна ветка на issue от свежего `main`: `<тип>/<кратко>`, например `feat/web-skeleton`,
-   `docs/adr-0007`. Прямых коммитов в `main` нет.
-3. **Коммиты.** Conventional Commits на английском (`feat:`, `fix:`, `docs:`, `chore:`, `ci:`),
-   небольшие и по одной идее.
-4. **Pull request.** Заполняйте шаблон, указывайте `Closes #N`. Заголовок PR — в стиле коммита,
-   на английском; описание — на русском. В «Не проверено» честно перечисляйте пропущенное.
-5. **Слияние.** Только squash, только после зелёной итоговой проверки `ci` (она собирает результаты всех jobs и матрицы ОС;
-   пропущенные по путям jobs считаются успехом, ADR-0017); ветка удаляется автоматически. Это закреплено настройками GitHub
-   (см. `docs/adr/0007-*`): прямой пуш в `main` невозможен. Добавление ОС или job защиту ветки менять не требует. Roadmap
-   обновляется сам, когда закрывается issue.
-   Выбор jobs по путям держит список «заведомо нерелевантных» файлов в `tools/ci/src/select.ts`: неизвестное считается
-   влияющим. Добавляя каталог или зависимость между частями, обновите список и тесты.
+1. **Issue.** Every task starts with an issue (`Task` or `Bug` template). Create one if needed and
+   link it to the Roadmap.
+2. **Branch.** One branch per issue from fresh `main`: `<type>/<summary>`, for example
+   `feat/web-skeleton`, `docs/adr-0007`. No direct commits to `main`.
+3. **Commits.** Small Conventional Commits in English (`feat:`, `fix:`, `docs:`, `chore:`, `ci:`),
+   one idea each.
+4. **Pull request.** Fill the template and include `Closes #N`. Title follows commit style in
+   English; description is in Russian. List skipped checks honestly under “Not verified”.
+5. **Merge.** Squash only, after the aggregate `ci` check is green (it collects all jobs and the OS
+   matrix; path-skipped jobs count as success, ADR-0017). The branch is deleted automatically.
+   These settings are enforced by GitHub (see `docs/adr/0007-*`): direct pushes to `main` are
+   impossible. Adding an OS or job does not require branch-protection changes. The Roadmap updates
+   automatically when an issue closes. Job selection keeps a list of “known irrelevant” files in
+   `tools/ci/src/select.ts`: unknown files are considered relevant. Update that list and tests when
+   adding directories or dependencies between project areas.
 
-Что требует подтверждения пользователя: коммиты, пуши, создание/закрытие issue и PR, слияние.
-Просьба пользователя «создай issue/PR» — это и есть подтверждение для названных действий,
-но не для других (например, слияния).
+User confirmation is required for commits, pushes, creating/closing issues and PRs, and merging.
+A user request to “create an issue/PR” confirms those named actions only, not other actions such as
+merging.
 
-Не добавляйте в репозиторий `node_modules`, `target`, `dist` (см. `.gitignore`).
+Do not add `node_modules`, `target`, or `dist` to the repository (see `.gitignore`).
