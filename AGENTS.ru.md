@@ -35,7 +35,6 @@
 - `tools/doctor` — диагностика окружения; `tools/boundaries` — проверка границ зависимостей, правила в `rules.json`.
 - `tools/ci` — выбор jobs CI по изменённым файлам (функция `select` с тестами), ADR-0017.
 - `tools/dev-server` — запуск Vite в фоне для browser launch в редакторах, ожидание готовности и остановка.
-- `tools/api-docs` — TypeDoc с собственной версией TypeScript, изолированной от TypeScript 7 приложения.
 - `deny.toml` — политика зависимостей Rust для `cargo-deny`; `.github/workflows/audit.yml` — еженедельная проверка уязвимостей.
 - `tests/e2e` — сквозные тесты веба (`vitest` + `playwright-core`, системный Chrome); без браузера пропускаются, а с `E2E_REQUIRE_BROWSER=1` падают.
 - `packages/core-api` — контракт ядра (ADR-0014): интерфейс `Core`, `CoreError`/`CoreException`, `contract/scenarios.json`
@@ -96,7 +95,6 @@ bun run deny                      # зависимости Rust: уязвимо�
 bun run format                    # oxfmt + cargo fmt: исправляет форматирование
 bun run format:check              # проверка форматирования TS (CI)
 bun run test                      # TS-тесты (vitest)
-bun run docs                      # WASM + generated Rustdoc/TypeDoc HTML в target/docs
 bun run check:wasm                # сборка WASM + typecheck кода, зависящего от pkg (core-wasm и web)
 bun run test:wasm                 # TS-тесты границы Rust↔JS на реальном WASM (собирает его; нужен wasm-bindgen-cli)
 bun run test:e2e                  # сквозной сценарий веба в настоящем браузере (ADR-0016; нужен Chrome/Chromium, CHROME_PATH)
@@ -144,9 +142,9 @@ cargo run -p app-cli -- fetch <url> <path>
 - Комментарии объясняют «почему», а не «что». Следуйте плотности комментариев вокруг.
 - Файлы документации двуязычные: канонический английский (`.md`) и русский перевод рядом (`.ru.md`),
   с перекрёстными ссылками. Специальные имена файлов GitHub могут содержать оба языка внутри одного файла.
-- Обычные `//` комментарии — на русском. Rustdoc (`///`, `//!`) и TSDoc (`/** ... */`) — на английском,
-  чтобы generated API-справки и быстрые справки функций были готовы к релизу. Сгенерированные файлы
-  для соблюдения этих правил не редактируются.
+- Обычные `//` комментарии — на русском. Rustdoc (`///`, `//!`) и TSDoc (`/** ... */`) — на английском
+  для docs.rs, declaration output и quick info в IDE. Сгенерированные файлы для соблюдения этих правил
+  не редактируются. Отдельного generated API-сайта нет (ADR-0021).
 - Legacy-документы и API-комментарии переносятся отдельными PR. Тест согласованности проверяет пары,
   но не качество перевода.
 

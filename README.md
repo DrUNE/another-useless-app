@@ -156,7 +156,6 @@ bun run deny                 # Rust dependencies: advisories, licenses, bans, so
 bun run format               # oxfmt (TS/JSON/CSS/HTML) and cargo fmt
 bun run format:check         # TS formatting check
 bun run test                 # TS tests (vitest)
-bun run docs                 # WASM + generated Rustdoc/TypeDoc HTML in target/docs
 
 bun run build:wasm           # build the core to WASM: packages/core-wasm/pkg
 bun run check:wasm           # build WASM and typecheck dependent code
@@ -177,9 +176,6 @@ bun run update:bindings      # regenerate apps/native/src/bindings.ts after comm
 cargo run -p app-cli -- fetch https://example.com /tmp/example.html
 cargo build -p app-cli --release   # binary: target/release/app
 ```
-
-Generated English API references are published to
-[GitHub Pages](https://drune.github.io/another-useless-app/) on release.
 
 Further reading:
 [Solid 2 and Tailwind 4 for React developers](docs/learning/solid-and-tailwind-for-react-developers.md),

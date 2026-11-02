@@ -1,6 +1,6 @@
 # 0020. Bilingual documentation and generated English API references
 
-Status: accepted (2026-11-02)
+Status: superseded by ADR-0021 (2026-11-02)
 
 [Русская версия](0020-bilingual-docs-and-api-reference.ru.md)
 

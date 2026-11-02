@@ -36,7 +36,6 @@ than the application itself.
   rules in `rules.json`.
 - `tools/ci` — selects CI jobs from changed files (`select` with tests), ADR-0017.
 - `tools/dev-server` — background Vite for browser launch, readiness checks, and shutdown.
-- `tools/api-docs` — TypeDoc with its own TypeScript version, isolated from the application's TS 7.
 - `deny.toml` — Rust dependency policy for `cargo-deny`; `.github/workflows/audit.yml` — weekly
   vulnerability checks.
 - `tests/e2e` — web E2E (`vitest` + `playwright-core`, system Chrome); skipped without a browser,
@@ -103,7 +102,6 @@ bun run deny                      # Rust dependencies: advisories, licenses, ban
 bun run format                    # oxfmt + cargo fmt: fixes formatting
 bun run format:check              # TS formatting check (CI)
 bun run test                      # TS tests (vitest)
-bun run docs                      # WASM + generated Rustdoc/TypeDoc HTML in target/docs
 bun run check:wasm                # WASM build and typecheck of pkg-dependent code (core-wasm and web)
 bun run test:wasm                 # TS tests of the Rust↔JS boundary on real WASM (wasm-bindgen-cli required)
 bun run test:e2e                  # end-to-end web scenario in a real browser (Chrome/Chromium, CHROME_PATH)
@@ -155,9 +153,9 @@ Its image is in `.devcontainer/`.
 - Comments explain “why”, not “what”. Follow the surrounding comment density.
 - Documentation files are bilingual: English is canonical (`.md`), Russian is next to it (`.ru.md`),
   with cross-links. Special filenames fixed by GitHub may contain both languages inline.
-- Ordinary `//` comments are Russian. Rustdoc (`///`, `//!`) and TSDoc (`/** ... */`) are English so
-  generated API references and quick function docs are release-ready. Do not edit generated files
-  to enforce these rules.
+- Ordinary `//` comments are Russian. Rustdoc (`///`, `//!`) and TSDoc (`/** ... */`) are English for
+  docs.rs, declaration output, and IDE quick info. Do not edit generated files to enforce these rules.
+  There is no standalone generated API site (ADR-0021).
 - Existing legacy documents and API comments are migrated in separate PRs. The consistency test
   checks language pairs but cannot judge translation quality.
 
