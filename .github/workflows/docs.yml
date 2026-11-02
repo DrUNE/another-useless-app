@@ -20,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Rustdoc собирает и app-native: на Linux ему нужны те же системные библиотеки, что нативной сборке.
+      - run: |
+          sudo apt-get update
+          xargs -a tools/system-deps/debian.txt sudo apt-get install -y --no-install-recommends
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       # Версия CLI обязана совпадать с крейтом wasm-bindgen: берём её из Cargo.lock, а не дублируем.
