@@ -6,6 +6,18 @@
     "use_new_terminal": true
   },
   {
+    "label": "web: ensure dev server",
+    "command": "bun",
+    "args": ["run", "dev:web:start"],
+    "hide": "on_success"
+  },
+  {
+    "label": "web: stop dev server",
+    "command": "bun",
+    "args": ["run", "dev:web:stop"],
+    "hide": "on_success"
+  },
+  {
     "label": "native: dev server",
     "command": "bun",
     "args": ["run", "--filter", "@app/native", "dev"],

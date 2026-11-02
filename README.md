@@ -113,17 +113,22 @@ VS Code предложит расширения Rust Analyzer, Oxc, Tailwind CSS
 в Zed — через **task: spawn** и **F4** соответственно. Общие сценарии и задачи совпадают; Firefox
 доступен только в VS Code.
 
-| Сценарий                                      | Подготовка                                                                                                                                            |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Web frontend: launch Chromium`               | Запустить задачу `web: dev server` или `bun run dev:web`; редактор попытается найти Chrome/Chromium автоматически.                                    |
-| `Web frontend: launch Chromium (CHROME_PATH)` | Задать `CHROME_PATH` перед запуском редактора, например `export CHROME_PATH=/usr/bin/yandex-browser`. Подходит для Chrome, Chromium и Yandex Browser. |
-| `Web frontend: attach Chromium`               | Запустить Vite и Chromium-совместимый браузер с флагами `--remote-debugging-port=9222` и отдельным `--user-data-dir`.                                 |
-| `Web frontend: launch Firefox` (VS Code)      | Запустить Vite; рекомендуемое расширение Debugger for Firefox откроет браузер.                                                                        |
-| `Web frontend: attach Firefox` (VS Code)      | Запустить Vite и `firefox -start-debugger-server`; используется порт 6000, а не CDP-порт 9222.                                                        |
-| `CLI backend: development` / `release`        | Дополнительная подготовка не нужна: Cargo соберёт binary. Пример скачивает `https://example.com` в игнорируемый каталог `target/`.                    |
-| `Native backend: development`                 | Запустить задачу `native: dev server`, затем сценарий; он откроет окно Tauri.                                                                         |
-| `Native backend: release`                     | В VS Code frontend соберётся через `preLaunchTask`; в Zed сначала запустить `native: build frontend`.                                                 |
-| `Native frontend: attach WebView2 (Windows)`  | Сначала запустить `Native backend: development`: он передаёт WebView2 порт 9222. Затем запустить attach-сценарий.                                     |
+| Сценарий                                      | Подготовка                                                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Web frontend: launch Chromium`               | Просто запустить сценарий: `web: ensure dev server` соберёт WASM, поднимет Vite и дождётся его готовности; затем откроется Chrome/Chromium.      |
+| `Web frontend: launch Chromium (CHROME_PATH)` | Задать `CHROME_PATH` перед запуском редактора, например `export CHROME_PATH=/usr/bin/yandex-browser`; Vite запустится автоматически, как и выше. |
+| `Web frontend: attach Chromium`               | Самостоятельно запустить Vite и Chromium-совместимый браузер с флагами `--remote-debugging-port=9222` и отдельным `--user-data-dir`.             |
+| `Web frontend: launch Firefox` (VS Code)      | Vite запустится автоматически; рекомендуемое расширение Debugger for Firefox откроет браузер после его готовности.                               |
+| `Web frontend: attach Firefox` (VS Code)      | Запустить Vite и `firefox -start-debugger-server`; используется порт 6000, а не CDP-порт 9222.                                                   |
+| `CLI backend: development` / `release`        | Дополнительная подготовка не нужна: Cargo соберёт binary. Пример скачивает `https://example.com` в игнорируемый каталог `target/`.               |
+| `Native backend: development`                 | Запустить задачу `native: dev server`, затем сценарий; он откроет окно Tauri.                                                                    |
+| `Native backend: release`                     | В VS Code frontend соберётся через `preLaunchTask`; в Zed сначала запустить `native: build frontend`.                                            |
+| `Native frontend: attach WebView2 (Windows)`  | Сначала запустить `Native backend: development`: он передаёт WebView2 порт 9222. Затем запустить attach-сценарий.                                |
+
+Launch-сценарии вызывают `web: ensure dev server`: уже работающий сервер используется повторно, а новый остаётся
+для следующих сессий. Остановить его можно задачей `web: stop dev server` или `bun run dev:web:stop`; PID и лог
+находятся в `target/`. Attach-сценарии сервер не запускают и не останавливают. Порт можно изменить через
+`WEB_DEV_SERVER_PORT`, тогда такой же порт нужно указать в `url` сценария.
 
 Release-сценарии Rust передают Cargo `profile.release.debug=true`: оптимизация остаётся release, но у отладчика
 есть символы и исходники. Для web source maps в dev-сервере Vite включены, а `webRoot` указывает на корень
@@ -153,7 +158,9 @@ bun run check:wasm           # сборка WASM + typecheck кода, кото�
 bun run test:wasm            # тесты границы Rust ↔ JS на реальном WASM (собирает его сам)
 bun run test:e2e            # сквозной сценарий веба в браузере (нужен Chrome/Chromium; путь в CHROME_PATH)
 
-bun run dev:web              # web: dev-сервер Vite
+bun run dev:web              # web: dev-сервер Vite в текущем терминале
+bun run dev:web:start        # web: обеспечить фоновый Vite для browser launch
+bun run dev:web:stop         # web: остановить Vite, запущенный предыдущей командой
 bun run build:web            # web: продакшен-сборка в apps/web/dist
 
 bun run dev:native           # desktop: окно Tauri с горячей перезагрузкой

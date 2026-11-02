@@ -43,6 +43,10 @@ describe("select", () => {
     expect(ran(["apps/web/src/index.tsx"])).toEqual(["ts", "wasm"]);
   });
 
+  it("runs web checks but not the desktop build for the browser dev-server helper", () => {
+    expect(ran(["tools/dev-server/src/index.ts"])).toEqual(["ts", "wasm"]);
+  });
+
   it("skips the web job for a change that only touches the desktop app", () => {
     expect(ran(["apps/native/src/core.ts"])).toEqual(["native", "ts"]);
     expect(ran(["apps/native/src-tauri/src/lib.rs"])).toEqual(["native", "rust"]);

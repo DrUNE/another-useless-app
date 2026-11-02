@@ -11,6 +11,20 @@
       "presentation": { "panel": "dedicated" }
     },
     {
+      "label": "web: ensure dev server",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "dev:web:start"],
+      "problemMatcher": []
+    },
+    {
+      "label": "web: stop dev server",
+      "type": "process",
+      "command": "bun",
+      "args": ["run", "dev:web:stop"],
+      "problemMatcher": []
+    },
+    {
       "label": "native: dev server",
       "type": "process",
       "command": "bun",

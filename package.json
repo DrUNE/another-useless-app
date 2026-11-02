@@ -32,6 +32,8 @@
   "type": "module",
   "scripts": {
     "dev:web": "bun run --filter @app/web dev",
+    "dev:web:start": "bun tools/dev-server/src/index.ts start",
+    "dev:web:stop": "bun tools/dev-server/src/index.ts stop",
     "build:web": "bun run --filter @app/web build",
     "dev:cli": "cargo run -p app-cli --",
     "build:cli": "cargo build -p app-cli --release",
